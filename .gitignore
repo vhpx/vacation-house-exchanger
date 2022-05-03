@@ -1,0 +1,24 @@
+#files being edited
+*~
+
+# make and build files
+*.lst
+*.o
+*.eep
+*.lss
+*.map
+*.sym
+
+tempCodeRunnerFile.c
+tempCodeRunnerFile.cpp
+
+# Executables & Outputs
+*.exe
+*.txt
+*.out
+*.dat
+
+# Project folders
+.vscode/
+playground/
+my-work/
