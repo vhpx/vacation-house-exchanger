@@ -28,10 +28,10 @@
 #define input(x) std::cin >> x                         // Get input
 
 void displayWelcomeMsg() {  // Display project welcome message
-    log(newl);
+    log("");
     log(APP_HEADER);    log(APP_NAME);
 
-    log(newl);
+    log("");
     log("Instructor: " << LECTURER_NAME);
     log("Group: " << GROUP_NAME);
     log(AUTHOR1_INFO);
@@ -39,7 +39,7 @@ void displayWelcomeMsg() {  // Display project welcome message
     log(AUTHOR3_INFO);
     log(AUTHOR4_INFO);
 
-    log(newl);
+    log("");
 }
 
 int main() {
