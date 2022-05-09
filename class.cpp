@@ -7,7 +7,7 @@
 #define new2l "\n\n"  // skip 2 lines
 
 // I/O macros
-#define illog(x) std::cout << x                        // Inline print
+#define illog(x) std::cout << x                        // In-line print
 #define log(x) std::cout << x << newl                  // Print with newline
 #define debug(x) std::cout << #x << ": " << x << newl  // Print with variable name
 #define show_error(x) std::cerr << x << newl           // Print error
@@ -18,7 +18,7 @@ using std::vector;
 
 class House{
     private:
-    
+
         
     public:
 };
