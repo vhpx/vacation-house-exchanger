@@ -18,13 +18,29 @@ using std::vector;
 
 class House{
     private:
-
         
     public:
+    // constructors
+
 };
 
-class Member{};
+class Member{
+    private:
+        
+    public:
+    // constructors
+};
 
-class Registered_Member : public Member{};
+class Registered_Member : public Member{
+    private:
+        
+    public:
+    // constructors
+};
 
-class Non_Registered_Member : public Member{};
+class Non_Registered_Member : public Member{
+    private:
+        
+    public:
+    // constructors
+};
