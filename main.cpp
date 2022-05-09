@@ -16,15 +16,15 @@
 
 //* Helper preprocessor macros
 // Miscellaneous macros
-#define newl '\n'
-#define new2l '\n\n'
+#define newl "\n"     // skip 1 line
+#define new2l "\n\n"  // skip 2 lines
 
 // I/O macros
-#define illog(x) std::cout << x
-#define log(x) std::cout << x << newl
-#define debug(x) std::cout << #x << ": " << x << newl
-#define show_error(x) std::cerr << x << newl
-#define input(x) std::cin >> x
+#define illog(x) std::cout << x                        // Inline print
+#define log(x) std::cout << x << newl                  // Print with newline
+#define debug(x) std::cout << #x << ": " << x << newl  // Print with variable name
+#define show_error(x) std::cerr << x << newl           // Print error
+#define input(x) std::cin >> x                         // Get input
 
 void displayWelcomeMsg() {
     log(newl << DIVIDER << newl);
