@@ -1,6 +1,7 @@
 #include <iostream>
 
 //* Constants
+// Listing project, lecturer, and authors information
 #define APP_HEADER "EEET2482/COSC2082 ASSIGNMENT"
 #define APP_NAME "VACATION HOUSE EXCHANGE APPLICATION"
 
@@ -26,23 +27,19 @@
 #define show_error(x) std::cerr << x << newl           // Print error
 #define input(x) std::cin >> x                         // Get input
 
-void displayWelcomeMsg() {
-    log(newl << DIVIDER << newl);
-    log(APP_HEADER);
-    log(APP_NAME);
+void displayWelcomeMsg() {  // Display project welcome message
+    log(newl);
+    log(APP_HEADER);    log(APP_NAME);
 
-    log(newl << DIVIDER << newl);
+    log(newl);
     log("Instructor: " << LECTURER_NAME);
     log("Group: " << GROUP_NAME);
-
-    log(newl << DIVIDER);
-    log("\t\t\tAuthors");
-    log(DIVIDER << newl);
-
     log(AUTHOR1_INFO);
     log(AUTHOR2_INFO);
     log(AUTHOR3_INFO);
-    log(AUTHOR4_INFO << newl);
+    log(AUTHOR4_INFO);
+
+    log(newl);
 }
 
 int main() {
