@@ -22,19 +22,13 @@ class House {
     // constructors
 };
 
-class Member {
+class Guest {
    private:
    public:
     // constructors
 };
 
-class Registered_Member : public Member {
-   private:
-   public:
-    // constructors
-};
-
-class Non_Registered_Member : public Member {
+class Member : public Guest {
    private:
    public:
     // constructors
