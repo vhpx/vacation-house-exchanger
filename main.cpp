@@ -22,24 +22,27 @@
 
 // I/O macros
 #define illog(x) std::cout << x                        // In-line print
+#define skipLine() illog(newl)                         // Skip 1 line in I/O
 #define log(x) std::cout << x << newl                  // Print with newline
 #define debug(x) std::cout << #x << ": " << x << newl  // Print with variable name
 #define show_error(x) std::cerr << x << newl           // Print error
 #define input(x) std::cin >> x                         // Get input
 
 void displayWelcomeMsg() {  // Display project welcome message
-    log("");
-    log(APP_HEADER);    log(APP_NAME);
+    skipLine();
 
-    log("");
+    log(APP_HEADER);
+    log(APP_NAME << newl);
+
     log("Instructor: " << LECTURER_NAME);
-    log("Group: " << GROUP_NAME);
+    log("Group: " << GROUP_NAME << newl);
+
     log(AUTHOR1_INFO);
     log(AUTHOR2_INFO);
     log(AUTHOR3_INFO);
     log(AUTHOR4_INFO);
 
-    log("");
+    skipLine();
 }
 
 int main() {
