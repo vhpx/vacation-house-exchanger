@@ -16,8 +16,33 @@
 using std::string;
 using std::vector;
 
+class Member{};
+class House{};
+class Rating{};
+
+class System {
+    private:
+        string ad_username;
+        string ad_password;
+    
+        vector<Member> members;
+        vector<House> houses;
+    
+    public:
+        void saveMembers();
+        void saveHouses();
+
+        void viewMembers();
+        void viewHouses();
+};
+
+
 class House {
    private:
+        string location;
+        string description;
+
+        vector<Rating> houseRatingScore;
    public:
     // constructors
 };
