@@ -42,16 +42,17 @@ class House {
         string location;
         string description;
 
-        vector<Rating> houseRatingScore;
-
-   public:
-    // constructors
         string dateStart;
         string dateEnd;
         int consumingPointsPerDev;
 
-        House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev);
+        House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev, vector<Member> members, vector<Rating> ratings);
 
+        vector<Rating> houseRatingScore;
+
+   public:
+    // constructors
+    
 };
 
 class Guest {
