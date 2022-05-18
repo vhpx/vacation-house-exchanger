@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 
-
 //* Helper preprocessor macros
 // Miscellaneous macros
 #define newl "\n"     // skip 1 line
@@ -17,160 +16,148 @@
 using std::string;
 using std::vector;
 
-class Member{};
-class House{};
-class Rating{};
-class Comment{};
-class Request{};
-
 class Rating {
-    private:
-        double value;
-
-
-    public:  
-        // constructors
-        Rating(int value);
-        int getScore();
+   private:
     
+
+   public:
+    // constructors
+    double value;
+    Rating(int value);
+    int getScore();
 };
 
 class Comment {
-    private:
-        string content;
+   private:
+    string content;
 
-        House *house;
+    // House *house;
 
-    public:
-        // constructors
-        Comment(string content);
-        string getContent();
+   public:
+    // constructors
+    Comment(string content);
+    string getContent();
 };
 
 class Request {
-    private:
-        int status;
+   private:
+    int status;
 
-        House *house;
+    // House *house;
 
-    public:
-        // constructors
-        Request(int status);
-        int getStatus();
+   public:
+    // constructors
+    Request(int status);
+    int getStatus();
 
-        void viewRequest();
+    void viewRequest();
 };
-
-class System {
-    private:
-        string ad_username;
-        string ad_password;
-    
-        vector<Member> members;
-        vector<House> houses;
-    
-    public:
-        void saveMembers();
-        void saveHouses();
-
-        void viewMembers();
-        void viewHouses();
-};
-
 
 class House {
    private:
-        // General Info
-        string location;
-        string description;
+    // General Info
+    string location;
+    string description;
 
-        // Owner
-        
+    // Owner
 
-        // House Reviews
-        vector<Rating> houseRatingScore;
-        vector<Comment> Comments;
-        vector<Request> Requests;
+    // House Reviews
+    vector<Rating *> houseRatingScores;
+    vector<Comment> Comments;
+    vector<Request> Requests;
 
-        // House lease details
-        string dateStart;
-        string dateEnd;
-        int consumingPointsPerDev;
+    // House lease details
+    string dateStart;
+    string dateEnd;
+    int consumingPointsPerDev;
 
    public:
-        // constructors
-        House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev, vector<Member> members, vector<Rating> ratings);
-        
-        // House lease details
-        string getDateStart();
-        string getDateEnd();
-        string getLocation();
-        string getDescription();
+    // constructors
+    House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev, vector<Member> members, vector<Rating> ratings);
 
-        int getConsumingPointsPerDev();
+    // House lease details
+    string getDateStart();
+    string getDateEnd();
+    string getLocation();
+    string getDescription();
 
-        // Something about house
-        void addRating(Rating rating) {
-            houseRatingScore.push_back(rating);
+    int getConsumingPointsPerDev();
+
+    // Something about house
+    void addRating(Rating *rating) {
+        houseRatingScores.push_back(rating);
+    }
+
+    void addRequest(Request request) {
+        Requests.push_back(request);
+    }
+
+    void addComment(Comment comment) {
+        Comments.push_back(comment);
+    }
+
+    // View all current house renting request
+    void viewAllRequests() {
+        for (int i = 0; i < Requests.size(); i++) {
+            Requests[i].viewRequest();
         }
+    }
 
-        void addRequest(Request request) {
-            Requests.push_back(request);
+    // Display details of the house
+    void viewHouseDetails(House house) {
+        log("Location: " << house.getLocation());
+        log("Description: " << house.getDescription());
+        log("Date Start: " << house.getDateStart());
+        log("Date End: " << house.getDateEnd());
+        log("Consuming Points Per Dev: " << house.getConsumingPointsPerDev());
+    }
+
+    double getRatingScore() {
+        double sum = 0;
+        for (auto eachHouseRate : houseRatingScores) {
+            sum += eachHouseRate->value;
         }
-
-        void addComment(Comment comment) {
-            Comments.push_back(comment);
-        }
-
-        // View all current house renting request
-        void viewAllRequests() {
-            for (int i = 0; i < Requests.size(); i++) {
-                Requests[i].viewRequest();
-            }
-        }
-
-        // Display details of the house
-        void viewHouseDetails(House house) {
-            log("Location: " << house.getLocation());
-            log("Description: " << house.getDescription());
-            log("Date Start: " << house.getDateStart());
-            log("Date End: " << house.getDateEnd());
-            log("Consuming Points Per Dev: " << house.getConsumingPointsPerDev());
-        }
-
-        // Get average rating score.
-        double getAverageRatingScore() {
-            double sum = 0;
-            for (int i = 0; i < houseRatingScore.size(); i++) {
-                sum += houseRatingScore[i].getScore();
-            }
-        }
-
+        return sum / houseRatingScores.size();
+    }
 };
 
 class Guest {
-    private:
-        void mem_register(){
+   private:
+    void mem_register() {
+    }
 
-        }
-
-    public:
-        virtual void viewHouseDetail(House *house){
-            
-        }
+   public:
+    virtual void viewHouseDetail(House *house) {
+    }
 };
 
 class Member : public Guest {
-    private:
-        string username;
-        string password;
-        string fullName;
-        string phone; 
+   private:
+    string username;
+    string password;
+    string fullName;
+    string phone;
 
-        int creditPoint = 500;
+    int creditPoint = 500;
 
-        House *house;
+    House *house;
 
-    public:
+   public:
     // constructors
+};
+
+class System {
+   private:
+    string ad_username;
+    string ad_password;
+
+    vector<Member> members;
+    vector<House> houses;
+
+   public:
+    void saveMembers();
+    void saveHouses();
+
+    void viewMembers();
+    void viewHouses();
 };
