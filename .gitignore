@@ -15,9 +15,3 @@ tempCodeRunnerFile.cpp
 *.exe
 *.txt
 *.out
-*.dat
-
-# Project folders
-.vscode/
-playground/
-my-work/
