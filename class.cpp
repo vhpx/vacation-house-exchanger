@@ -65,6 +65,9 @@ class House {
         // House lease details
         string getDateStart();
         string getDateEnd();
+        string getLocation();
+        string getDescription();
+
         int getConsumingPointsPerDev();
 
         // House Reviews
@@ -82,7 +85,13 @@ class House {
 
         // House owner
         void viewAllRequests();
-        void viewHouseDetails(House house);
+        void viewHouseDetails(House house) {
+            log("Location: " << house.getLocation());
+            log("Description: " << house.getDescription());
+            log("Date Start: " << house.getDateStart());
+            log("Date End: " << house.getDateEnd());
+            log("Consuming Points Per Dev: " << house.getConsumingPointsPerDev());
+        }
 
         // Get average rating score.
         double getAverageRatingScore() {
