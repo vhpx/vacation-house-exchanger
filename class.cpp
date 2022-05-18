@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 
+
 //* Helper preprocessor macros
 // Miscellaneous macros
 #define newl "\n"     // skip 1 line
@@ -21,6 +22,44 @@ class House{};
 class Rating{};
 class Comment{};
 class Request{};
+
+class Rating {
+    private:
+        double value;
+
+
+    public:  
+        // constructors
+        Rating(int value);
+        int getScore();
+    
+};
+
+class Comment {
+    private:
+        string content;
+
+        House *house;
+
+    public:
+        // constructors
+        Comment(string content);
+        string getContent();
+};
+
+class Request {
+    private:
+        int status;
+
+        House *house;
+
+    public:
+        // constructors
+        Request(int status);
+        int getStatus();
+
+        void viewRequest();
+};
 
 class System {
     private:
@@ -134,42 +173,4 @@ class Member : public Guest {
 
     public:
     // constructors
-};
-
-class Rating {
-    private:
-        double value;
-
-
-    public:  
-        // constructors
-        Rating(int value);
-        int getScore();
-    
-};
-
-class Comment {
-    private:
-        string content;
-
-        House *house;
-
-    public:
-        // constructors
-        Comment(string content);
-        string getContent();
-};
-
-class Request {
-    private:
-        int status;
-
-        House *house;
-
-    public:
-        // constructors
-        Request(int status);
-        int getStatus();
-
-        void viewRequest();
 };
