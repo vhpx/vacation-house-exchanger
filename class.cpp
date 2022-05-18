@@ -72,12 +72,8 @@ class House {
         void addRequest(Request request);
 
         // House owner
-        void addMember(Member member);
-        void removeMember(Member member);
-        void viewMembers();
-        void viewRatings();
-        void viewComments();
         void viewAllRequests();
+        void viewHouseDetails(House house);
 
     // constructors
 };
