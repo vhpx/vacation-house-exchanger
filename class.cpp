@@ -76,13 +76,12 @@ class House {
         void viewAllRequests();
         void viewHouseDetails(House house);
 
-        // Get average occupier-rating score
-        double getRatingScore() {
+        // Get average rating score.
+        double getAverageRatingScore() {
             double sum = 0;
             for (int i = 0; i < houseRatingScore.size(); i++) {
                 sum += houseRatingScore[i].getScore();
             }
-            return sum / houseRatingScore.size();
         }
 
 };
@@ -119,8 +118,11 @@ class Rating {
         int value;
 
 
-    public:
-    // constructors
+    public:  
+        // constructors
+        Rating(int value);
+        int getScore();
+    
 };
 
 class Comment {
