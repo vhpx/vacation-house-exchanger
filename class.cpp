@@ -55,7 +55,6 @@ class House {
 
    public:
     // constructors
-
 };
 
 class Guest {
@@ -80,6 +79,29 @@ class Member : public Guest {
         int creditPoint = 500;
 
         House *house;
+
+    public:
+    // constructors
+};
+
+class Ratings {
+    private:
+        int value;
+
+
+    public:
+    // constructors
+};
+
+class Comments {
+    private:
+
+    public:
+    // constructors
+};
+
+class Requests {
+    private:
 
     public:
     // constructors
