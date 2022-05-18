@@ -145,6 +145,7 @@ class House {
         log("Consuming Points Per Dev: " << house.getConsumingPointsPerDev());
     }
 
+    // Get rating score of the house
     double getRatingScore() {
         double sum = 0;
         for (auto eachHouseRate : houseRatingScores) {
