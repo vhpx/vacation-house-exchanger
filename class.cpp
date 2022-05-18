@@ -95,6 +95,9 @@ class Ratings {
 
 class Comments {
     private:
+        string content;
+
+        House *house;
 
     public:
     // constructors
@@ -102,6 +105,9 @@ class Comments {
 
 class Requests {
     private:
+        int status;
+
+        House *house;
 
     public:
     // constructors
