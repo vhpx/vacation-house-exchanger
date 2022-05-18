@@ -16,6 +16,14 @@
 using std::string;
 using std::vector;
 
+class Rating;
+class Comment;
+class Request;
+class House;
+class Guess;
+class Member;
+class System;
+
 class Rating {
    private:
     
@@ -51,6 +59,31 @@ class Request {
     int getStatus();
 
     void viewRequest();
+};
+
+class Guest {
+   private:
+    void mem_register() {
+    }
+
+   public:
+    virtual void viewHouseDetail(House *house) {
+    }
+};
+
+class Member : public Guest {
+   private:
+    string username;
+    string password;
+    string fullName;
+    string phone;
+
+    int creditPoint = 500;
+
+    House *house;
+
+   public:
+    // constructors
 };
 
 class House {
@@ -119,31 +152,6 @@ class House {
         }
         return sum / houseRatingScores.size();
     }
-};
-
-class Guest {
-   private:
-    void mem_register() {
-    }
-
-   public:
-    virtual void viewHouseDetail(House *house) {
-    }
-};
-
-class Member : public Guest {
-   private:
-    string username;
-    string password;
-    string fullName;
-    string phone;
-
-    int creditPoint = 500;
-
-    House *house;
-
-   public:
-    // constructors
 };
 
 class System {
