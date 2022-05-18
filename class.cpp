@@ -19,7 +19,7 @@ using std::vector;
 class Member{};
 class House{};
 class Rating{};
-class Comments{};
+class Comment{};
 class Request{};
 
 class System {
@@ -50,7 +50,7 @@ class House {
 
         // House Reviews
         vector<Rating> houseRatingScore;
-        vector<Comments> Comments;
+        vector<Comment> Comments;
         vector<Request> Requests;
 
         // House lease details
@@ -68,9 +68,17 @@ class House {
         int getConsumingPointsPerDev();
 
         // House Reviews
-        void addRating(Rating rating);
-        void addComments(Comment comment);
-        void addRequest(Request request);
+        void addRating(Rating rating) {
+            houseRatingScore.push_back(rating);
+        }
+
+        void addRequest(Request request) {
+            Requests.push_back(request);
+        }
+
+        void addComment(Comment comment) {
+            Comments.push_back(comment);
+        }
 
         // House owner
         void viewAllRequests();
@@ -89,7 +97,7 @@ class House {
 class Guest {
     private:
         void mem_register(){
-            Member new_mem;
+
         }
 
     public:
@@ -115,7 +123,7 @@ class Member : public Guest {
 
 class Rating {
     private:
-        int value;
+        double value;
 
 
     public:  
@@ -132,7 +140,9 @@ class Comment {
         House *house;
 
     public:
-    // constructors
+        // constructors
+        Comment(string content);
+        string getContent();
 };
 
 class Request {
@@ -142,5 +152,7 @@ class Request {
         House *house;
 
     public:
-    // constructors
+        // constructors
+        Request(int status);
+        int getStatus();
 };
