@@ -43,8 +43,15 @@ class House {
         string description;
 
         vector<Rating> houseRatingScore;
+
    public:
     // constructors
+        string dateStart;
+        string dateEnd;
+        int consumingPointsPerDev;
+
+        House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev);
+
 };
 
 class Guest {
