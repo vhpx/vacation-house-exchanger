@@ -27,6 +27,7 @@
 #define debug(x) std::cout << #x << ": " << x << newl  // Print with variable name
 #define show_error(x) std::cerr << x << newl           // Print error
 #define input(x) std::cin >> x                         // Get input
+#define inputStr(x) std::getline(std::cin, x)          // Input string
 
 void displayWelcomeMsg() {  // Display project welcome message
     skipLine();
