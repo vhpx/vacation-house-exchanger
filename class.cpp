@@ -70,7 +70,7 @@ class House {
 
         int getConsumingPointsPerDev();
 
-        // House Reviews
+        // Something about house
         void addRating(Rating rating) {
             houseRatingScore.push_back(rating);
         }
@@ -83,14 +83,27 @@ class House {
             Comments.push_back(comment);
         }
 
-        // House owner
-        void viewAllRequests();
+        // View all current house renting request
+        void viewAllRequests() {
+            for (int i = 0; i < Requests.size(); i++) {
+                Requests[i].viewRequest();
+            }
+        }
+
+        // Display details of the house
         void viewHouseDetails(House house) {
             log("Location: " << house.getLocation());
             log("Description: " << house.getDescription());
             log("Date Start: " << house.getDateStart());
             log("Date End: " << house.getDateEnd());
             log("Consuming Points Per Dev: " << house.getConsumingPointsPerDev());
+        }
+
+        // Display a list of current houses for lease
+        void viewRentHouseList(vector<House> houses) {
+            for (int i = 0; i < houses.size(); i++) {
+                viewHouseDetails(houses[i]);
+            }
         }
 
         // Get average rating score.
@@ -164,4 +177,6 @@ class Request {
         // constructors
         Request(int status);
         int getStatus();
+
+        void viewRequest();
 };
