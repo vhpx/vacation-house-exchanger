@@ -43,7 +43,6 @@ class House {
    private:
         string location;
         string description;
-
         string dateStart;
         string dateEnd;
         int consumingPointsPerDev;
@@ -56,17 +55,32 @@ class House {
 
    public:
     // constructors
-    
+
 };
 
 class Guest {
-   private:
-   public:
-    // constructors
+    private:
+        void mem_register(){
+            Member new_mem;
+        }
+
+    public:
+        virtual void viewHouseDetail(House *house){
+            
+        }
 };
 
 class Member : public Guest {
-   private:
-   public:
+    private:
+        string username;
+        string password;
+        string fullName;
+        string phone;
+
+        int creditPoint = 500;
+
+        House *house;
+
+    public:
     // constructors
 };
