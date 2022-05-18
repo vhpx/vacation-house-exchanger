@@ -99,13 +99,6 @@ class House {
             log("Consuming Points Per Dev: " << house.getConsumingPointsPerDev());
         }
 
-        // Display a list of current houses for lease
-        void viewRentHouseList(vector<House> houses) {
-            for (int i = 0; i < houses.size(); i++) {
-                viewHouseDetails(houses[i]);
-            }
-        }
-
         // Get average rating score.
         double getAverageRatingScore() {
             double sum = 0;
