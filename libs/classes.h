@@ -8,17 +8,24 @@ using std::string;
 using std::vector;
 
 namespace HouseExchanger {
+//* prototype classes
+class Member;
+class House;
+class Rating;
+class Comment;
+class Request;
+
 class House {
    private:
+    string id = "";
     string location = "";
     string description = "";
-
-    // vector<Rating*> ratings;
 
     string listingStart = "";
     string listingEnd = "";
 
     int consumptionPts = 0;  // points per day
+    vector<Rating*> ratings;
 
    public:
     // Default constructor
@@ -99,6 +106,7 @@ class Member : public Guest {
 
 class Rating {
    private:
+    string id = "";
     House* house = nullptr;
     Member* author = nullptr;
     string content = "";
@@ -123,6 +131,7 @@ class Rating {
 
 class Request {
    private:
+    string id = "";
     House* house = nullptr;
     Member* requester = nullptr;
     string content = "";
@@ -147,6 +156,7 @@ class Request {
 
 class Comment {
    private:
+    string id = "";
     House* house = nullptr;
     Member* author = nullptr;
     string content = "";
@@ -186,18 +196,24 @@ class System {
     // Destructor
     ~System();
 
+    // Utility functions
+    string generateId();
+
+    // Loading methods
     bool loadMembers();
     bool loadHouses();
     bool loadRatings();
     bool loadComments();
     bool loadRequests();
 
+    // Saving methods
     bool saveMembers();
     bool saveHouses();
     bool saveRatings();
     bool saveComments();
     bool saveRequests();
 
+    // I/O bundle
     bool loadAll();
     bool saveAll();
 };

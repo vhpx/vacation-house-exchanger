@@ -23,7 +23,7 @@
 #define AUTHOR3_INFO "s3926793, Nguyen Pham Anh Thu"
 #define AUTHOR4_INFO "s3927460, Nguyen Ngoc Luong"
 
-#define DIVIDER "-----------------------------------"
+#define DIVIDER "---------------------------------------"
 
 namespace HouseExchanger {
 void displayWelcomeMsg() {
@@ -43,5 +43,22 @@ void displayWelcomeMsg() {
 
     skipLine();
     illog(DIVIDER);
+}
+
+void displayMenu(bool isLoggedIn) {
+    skipLine();
+    log("\tPlease select an option" << newl);
+
+    if (isLoggedIn) {
+        log("1. Search for a member");
+        log("2. View account details");
+        log("3. Logout");
+        log("4. Exit program");
+    } else {
+        log("1. Sign up");
+        log("2. Login");
+        log("3. Browse houses");
+        log("4. Exit program" << newl);
+    }
 }
 }  // namespace HouseExchanger
