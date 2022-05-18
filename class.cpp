@@ -93,6 +93,7 @@ class House {
     string description;
 
     // Owner
+    Member *owner;
 
     // House Reviews
     vector<Rating *> houseRatingScores;
