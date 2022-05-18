@@ -22,6 +22,8 @@ int main() {
     // By default, the system is not initialized.
     // Therefore, Load all the data before the user can interact with the system.
     bool loadSuccess = system->loadAll();
+
+    // Throw an exception if the system failed to load all the data.
     if (!loadSuccess)
         return 1;
 
@@ -42,14 +44,14 @@ int main() {
     int choice = 0;
 
     while (choice != 4) {
-        // Display menu
+        // Display menu.
         displayMenu(member != nullptr);
 
-        // Get user choice
+        // Get user choice.
         illog("Enter your choice: ");
         input(choice);
 
-        // Process user choice
+        // Process user choice.
         switch (choice) {
             case 1:
                 // Sign up
@@ -74,14 +76,13 @@ int main() {
                 break;
         }
 
-        // If the user wishes to quit,
-        // the system will be destroyed.
+        // Exit the loop the user wishes to quit the program.
         if (choice == 4)
             break;
 
-        // Wait for user to press enter
+        // Wait for user to press enter.
         skipLine();
-        std::system("PAUSE");  // Only works on Windows
+        std::system("PAUSE");  // Only works on Windows.
 
         // Clear screen
         std::system("cls");
@@ -98,6 +99,7 @@ int main() {
     delete guest;
     delete member;
 
+    // Throw an exception if the system failed to save all the data.
     if (!saveSuccess)
         return 2;
 

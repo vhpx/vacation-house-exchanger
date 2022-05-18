@@ -233,6 +233,10 @@ void Request::setContent(string content) {
     this->content = content;
 }
 
+void Request::setStatus(int status) {
+    this->status = status;
+}
+
 // Getters
 House* Request::getHouse() {
     return this->house;
@@ -244,6 +248,10 @@ Member* Request::getRequester() {
 
 string Request::getContent() {
     return this->content;
+}
+
+int Request::getStatus() {
+    return this->status;
 }
 
 //* Comment class

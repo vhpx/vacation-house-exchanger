@@ -7,6 +7,12 @@
 using std::string;
 using std::vector;
 
+enum RequestStatus {
+    PENDING,
+    APPROVED,
+    DENIED
+};
+
 namespace HouseExchanger {
 //* prototype classes
 class Member;
@@ -135,6 +141,7 @@ class Request {
     House* house = nullptr;
     Member* requester = nullptr;
     string content = "";
+    int status = RequestStatus::PENDING;
 
    public:
     // Default constructor
@@ -147,11 +154,13 @@ class Request {
     void setHouse(House* house);
     void setRequester(Member* requester);
     void setContent(string content);
+    void setStatus(int status);
 
     // Getters
     House* getHouse();
     Member* getRequester();
     string getContent();
+    int getStatus();
 };
 
 class Comment {
