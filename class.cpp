@@ -76,7 +76,14 @@ class House {
         void viewAllRequests();
         void viewHouseDetails(House house);
 
-    
+        // Get average rating score.
+        double getAverageRatingScore() {
+            double sum = 0;
+            for (int i = 0; i < houseRatingScore.size(); i++) {
+                sum += houseRatingScore[i].getScore();
+            }
+        }
+
 };
 
 class Guest {
@@ -96,7 +103,7 @@ class Member : public Guest {
         string username;
         string password;
         string fullName;
-        string phone;
+        string phone; 
 
         int creditPoint = 500;
 
@@ -111,8 +118,11 @@ class Rating {
         int value;
 
 
-    public:
-    // constructors
+    public:  
+        // constructors
+        Rating(int value);
+        int getScore();
+    
 };
 
 class Comment {
