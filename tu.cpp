@@ -19,8 +19,6 @@ using std::vector;
 class Member{};
 class House{};
 class Rating{};
-class Comments{};
-class Request{};
 
 class System {
     private:
@@ -41,48 +39,23 @@ class System {
 
 class House {
    private:
-        // General Info
         string location;
         string description;
-
-        // Owner
-        
-
-        // House Reviews
-        vector<Rating> houseRatingScore;
-        vector<Comments> Comments;
-        vector<Request> Requests;
-
-        // House lease details
         string dateStart;
         string dateEnd;
         int consumingPointsPerDev;
 
-   public:
-        // constructors
         House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev, vector<Member> members, vector<Rating> ratings);
-        
-        // House lease details
-        string getDateStart();
-        string getDateEnd();
-        int getConsumingPointsPerDev();
 
-        // House Reviews
-        void addRating(Rating rating);
-        void addComments(Comment comment);
-        void addRequest(Request request);
+        vector<Rating> houseRatingScore;
+   public:
+    // constructors
 
-        // House owner
-        void viewAllRequests();
-        void viewHouseDetails(House house);
-
-    
 };
 
 class Guest {
     private:
         void mem_register(){
-            Member new_mem;
         }
 
     public:
@@ -93,44 +66,48 @@ class Guest {
 
 class Member : public Guest {
     private:
+    // Member private information
         string username;
         string password;
         string fullName;
         string phone;
 
-        int creditPoint = 500;
+        int creditPoint = 500;    // Default credit point
 
+    // Owned house information
         House *house;
+        // Rating
+
+        // Occupier
 
     public:
     // constructors
-};
+        Member(){} // default
 
-class Rating {
-    private:
-        int value;
+        Member(string username, string password, string fullName, string phone){    // member without a house
+            this->username = username;
+            this->password = password;
+            this->fullName = fullName;
+            this->phone = phone;
+        }
+
+        Member(string username, string password, string fullName, string phone, House *house){    // member with a house
+            this->username = username;
+            this->password = password;
+            this->fullName = fullName;
+            this->phone = phone;
+            this->house = house;
+        }
+
+    // lease-related activities
+        void lease(Member *member);
+        void resume();
+
+    // rental-related activities
+        void viewLeasedHouseList(vector<House*> houses){
+
+        }
 
 
-    public:
-    // constructors
-};
 
-class Comment {
-    private:
-        string content;
-
-        House *house;
-
-    public:
-    // constructors
-};
-
-class Request {
-    private:
-        int status;
-
-        House *house;
-
-    public:
-    // constructors
 };
