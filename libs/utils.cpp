@@ -23,8 +23,11 @@
 #define AUTHOR3_INFO "s3926793, Nguyen Pham Anh Thu"
 #define AUTHOR4_INFO "s3927460, Nguyen Ngoc Luong"
 
+#define DIVIDER "-----------------------------------"
+
 namespace HouseExchanger {
 void displayWelcomeMsg() {
+    log(DIVIDER);
     skipLine();
 
     log(APP_HEADER);
@@ -39,5 +42,6 @@ void displayWelcomeMsg() {
     log(AUTHOR4_INFO);
 
     skipLine();
+    illog(DIVIDER);
 }
 }  // namespace HouseExchanger
