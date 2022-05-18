@@ -41,17 +41,24 @@ class System {
 
 class House {
    private:
+        // General Info
         string location;
         string description;
+
+        // Owner
+        
+
+        // House Reviews
+        vector<Rating> houseRatingScore;
+        vector<Comments> Comments;
+        vector<Request> Requests;
+
+        // House lease details
         string dateStart;
         string dateEnd;
         int consumingPointsPerDev;
 
         House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev, vector<Member> members, vector<Rating> ratings);
-
-        vector<Rating> houseRatingScore;
-        vector<Comments> Comments;
-        vector<Request> Requests;
 
    public:
     // constructors
