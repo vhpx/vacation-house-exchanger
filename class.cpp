@@ -59,6 +59,7 @@ class Request {
     int getStatus();
 
     void viewRequest();
+    void setStatus(int status);
 };
 
 class Guest {
@@ -135,6 +136,11 @@ class House {
         for (int i = 0; i < Requests.size(); i++) {
             Requests[i].viewRequest();
         }
+    }
+
+    // Respond to request
+    void respondToRequest(Request request, int status) {
+        request.setStatus(status);
     }
 
     // Display details of the house
