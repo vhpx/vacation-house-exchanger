@@ -19,6 +19,8 @@ using std::vector;
 class Member{};
 class House{};
 class Rating{};
+class Comments{};
+class Request{};
 
 class System {
     private:
@@ -49,6 +51,8 @@ class House {
         House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev, vector<Member> members, vector<Rating> ratings);
 
         vector<Rating> houseRatingScore;
+        vector<Comments> Comments;
+        vector<Request> Requests;
 
    public:
     // constructors
