@@ -29,6 +29,8 @@ string getFilePath(const string& fileName) {
     return DATA_PATH + fileName;
 }
 
+// UUID generator source:
+// https://stackoverflow.com/a/60198074/18811079
 namespace uuid {
 static std::random_device rd;
 static std::mt19937 gen(rd());
