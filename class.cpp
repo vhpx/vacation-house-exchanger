@@ -39,7 +39,7 @@ class Comment {
    private:
     string content;
 
-    // House *house;
+    House *house;
 
    public:
     // constructors
@@ -51,7 +51,7 @@ class Request {
    private:
     int status;
 
-    // House *house;
+    House *house;
 
    public:
     // constructors
