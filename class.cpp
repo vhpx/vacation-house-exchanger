@@ -58,9 +58,10 @@ class House {
         string dateEnd;
         int consumingPointsPerDev;
 
-        House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev, vector<Member> members, vector<Rating> ratings);
-
    public:
+        // constructors
+        House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev, vector<Member> members, vector<Rating> ratings);
+        
         // House lease details
         string getDateStart();
         string getDateEnd();
@@ -75,7 +76,7 @@ class House {
         void viewAllRequests();
         void viewHouseDetails(House house);
 
-    // constructors
+    
 };
 
 class Guest {
