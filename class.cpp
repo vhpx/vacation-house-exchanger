@@ -61,6 +61,24 @@ class House {
         House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev, vector<Member> members, vector<Rating> ratings);
 
    public:
+        // House lease details
+        string getDateStart();
+        string getDateEnd();
+        int getConsumingPointsPerDev();
+
+        // House Reviews
+        void addRating(Rating rating);
+        void addComments(Comments comments);
+        void addRequest(Request request);
+
+        // House owner
+        void addMember(Member member);
+        void removeMember(Member member);
+        void viewMembers();
+        void viewRatings();
+        void viewComments();
+        void viewAllRequests();
+
     // constructors
 };
 
