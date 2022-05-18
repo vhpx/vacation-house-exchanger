@@ -1,0 +1,3 @@
+namespace HouseExchanger {
+void displayWelcomeMsg();
+}
