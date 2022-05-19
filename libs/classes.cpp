@@ -10,7 +10,7 @@
 
 //* Constants
 // Preferences
-#define SHOW_PROCESSED_AMOUNT false  // Log out the amount of loaded / saved data
+#define SHOW_PROCESSED_AMOUNT true  // Log out the amount of loaded / saved data
 
 // Data
 const string DATA_PATH = "data/";
@@ -39,6 +39,7 @@ const string COMMENTS_FILE = "comments.dat";
 
 // Input string with/without spaces
 #define inputStr(x)            \
+    illog(Colors::CYAN);       \
     std::cin.ignore();         \
     std::getline(std::cin, x); \
     illog(Colors::RESET)
@@ -103,6 +104,10 @@ House::House() {}
 House::~House() {}
 
 // Setters
+void House::setOwner(Member* owner) {
+    this->owner = owner;
+}
+
 void House::setId(string id) {
     this->id = id;
 }
@@ -128,6 +133,10 @@ void House::setConsumptionPts(int points) {
 }
 
 // Getters
+Member* House::getOwner() {
+    return owner;
+}
+
 string House::getId() {
     return this->id;
 }
@@ -232,6 +241,84 @@ bool Member::logout() {
     return System::getInstance()->logout();
 }
 
+bool Member::verifyPassword(string password) {
+    return password.compare(this->password) == 0;
+}
+
+bool Member::changePassword() {
+    // Get user input.
+    string oldPassword, newPassword;
+
+    illogInfo("Enter your old password: ");
+    input(oldPassword);
+
+    illogInfo("Enter your new password: ");
+    input(newPassword);
+
+    // Change the password through the System.
+    bool changeSuccessful = System::getInstance()->changePassword(oldPassword, newPassword);
+
+    skipLine();
+    if (changeSuccessful) {
+        logSuccess("Password changed successfully.");
+    } else {
+        logError("Password change failed.");
+    }
+
+    skipLine();
+    std::system("PAUSE");  // Only works on Windows.
+
+    return changeSuccessful;
+}
+
+bool Member::updateProfile() {
+    // Get user input.
+    string fullName, phone;
+
+    illogInfo("Enter your new full name: ");
+    inputStr(fullName);
+
+    illogInfo("Enter your new phone number: ");
+    input(phone);
+
+    if (fullName.compare(this->fullName) != 0)
+        setFullName(fullName);
+
+    if (phone.compare(this->phone) != 0)
+        setPhone(phone);
+
+    skipLine();
+    logSuccess("Profile updated successfully.");
+
+    skipLine();
+    std::system("PAUSE");  // Only works on Windows.
+
+    return true;
+}
+
+bool Member::deleteProfile() {
+    // Get user input.
+    string password;
+
+    illogInfo("Enter your password: ");
+    input(password);
+
+    // Delete the member through the System.
+    bool successful = System::getInstance()->deleteProfile(password);
+
+    skipLine();
+    if (successful) {
+        logSuccess("Profile deleted successfully.");
+    } else {
+        logError("Profile deletion failed.");
+    }
+
+    skipLine();
+    std::system("PAUSE");  // Only works on Windows.
+
+    return successful;
+}
+
 // Setters
 void Member::setId(string id) {
     this->id = id;
@@ -251,6 +338,10 @@ void Member::setFullName(string fullName) {
 
 void Member::setPhone(string phone) {
     this->phone = phone;
+}
+
+void Member::setHouse(House* house) {
+    this->house = house;
 }
 
 // Getters
@@ -280,6 +371,47 @@ int Member::getCreditPoint() {
 
 House* Member::getHouse() {
     return this->house;
+}
+
+void Member::setupHouse() {
+    // Get user input.
+    string location, description, listingStart, listingEnd;
+
+    illogInfo("Enter the location of the house: ");
+    input(location);
+
+    illogInfo("Enter the description of the house: ");
+    input(description);
+
+    illogInfo("Enter the listing start date: ");
+    input(listingStart);
+
+    illogInfo("Enter the listing end date: ");
+    input(listingEnd);
+
+    // Create a new house object to store the data.
+    House house;
+
+    // Set house data.
+    house.setOwner(this);
+    house.setLocation(location);
+    house.setDescription(description);
+    house.setListingStart(listingStart);
+    house.setListingEnd(listingEnd);
+
+    // Add the house to the system.
+    House* savedHouse = System::getInstance()->addHouse(house);
+
+    skipLine();
+    if (savedHouse != nullptr) {
+        setHouse(savedHouse);
+        logSuccess("House added successfully.");
+    } else {
+        logError("House setup failed.");
+    }
+
+    skipLine();
+    std::system("PAUSE");  // Only works on Windows.
 }
 
 void Member::viewHouseDetail(House* house) {
@@ -459,6 +591,10 @@ string System::generateId() {
     return uuid::generate_uuid_v4();
 }
 
+void System::notify(string message, string color = Colors::YELLOW) {
+    logInfo(Colors::CYAN << Colors::BOLD << "SYSTEM" << Colors::RESET << " - " << color << message);
+}
+
 // Authentication methods
 bool System::signUp(Member member) {
     Member* newMember = addMember(member);
@@ -508,10 +644,81 @@ bool System::logout() {
     // Update current member
     setCurrentMember(nullptr);
     setIsLoggedIn(false);
+    setIsAdmin(false);
 
     // Display success message
     logSuccess("Logout successful.");
     return true;
+}
+
+bool System::changePassword(string newPassword, Member* member) {
+    // Allow for change password without old password
+    // only if the current user is an admin.
+    if (!isAdmin()) {
+        logError("You must be an admin to change password without the old one.");
+        return false;
+    }
+    member->setPassword(newPassword);
+    return true;
+}
+
+bool System::changePassword(string oldPassword, string newPassword) {
+    if (currentMember->getPassword().compare(oldPassword) == 0) {
+        currentMember->setPassword(newPassword);
+        return true;
+    } else {
+        skipLine();
+        logError("Incorrect old password.");
+
+        return false;
+    }
+}
+
+bool System::deleteProfile(Member* member) {
+    // Allow for delete profile without old password
+    // only if the current user is an admin.
+    if (!isAdmin()) {
+        logError("You must be an admin to delete a profile without a password.");
+        return false;
+    }
+
+    for (int i = 0; i < members.size(); i++) {
+        if (members[i].getId().compare(member->getId()) == 0) {
+            members.erase(members.begin() + i);
+            logSuccess("Profile deleted.");
+            return true;
+        }
+    }
+
+    // Display failure message
+    logError("Profile not found.");
+    return false;
+}
+
+bool System::deleteProfile(string password) {
+    skipLine();
+
+    for (int i = 0; i < members.size(); i++) {
+        if (members[i].getId().compare(currentMember->getId()) == 0) {
+            if (members[i].getPassword().compare(password) != 0) {
+                logError("Incorrect password.");
+                return false;
+            }
+
+            members.erase(members.begin() + i);
+
+            // Update current member
+            setCurrentMember(nullptr);
+            setIsLoggedIn(false);
+            setIsAdmin(false);
+
+            return true;
+        }
+    }
+
+    // Display failure message
+    logError("Profile not found.");
+    return false;
 }
 
 // User related methods
@@ -603,7 +810,7 @@ bool System::loadMembers() {
     file.open(filePath, std::ios::in);
 
     if (!file.is_open()) {
-        logError("Error: " << filePath + " not found.");
+        notify("Error: " + filePath + " not found.", Colors::RED);
         return false;
     }
 
@@ -619,7 +826,7 @@ bool System::loadMembers() {
         }
 
         if (tokens.size() != 5) {
-            logError("Invalid member format.");
+            notify("Error: Invalid Member format.", Colors::RED);
             continue;
         }
 
@@ -637,7 +844,7 @@ bool System::loadMembers() {
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Loaded " << members.size() << " members.");
+        notify("Loaded " + Colors::YELLOW + std::to_string(members.size()) + Colors::GREEN + " members.", Colors::GREEN);
 
     return true;
 }
@@ -649,7 +856,7 @@ bool System::loadHouses() {
     file.open(filePath, std::ios::in);
 
     if (!file.is_open()) {
-        logError("Error: " << filePath + " not found.");
+        notify("Error: " + filePath + " not found.", Colors::RED);
         return false;
     }
 
@@ -664,26 +871,39 @@ bool System::loadHouses() {
             tokens.push_back(item);
         }
 
-        if (tokens.size() != 6) {
-            logError("Invalid house format.");
+        if (tokens.size() != 7) {
+            notify("Error: Invalid House format.", Colors::RED);
             continue;
         }
 
+        System* system = System::getInstance();
         House house;
 
-        house.setLocation(tokens[1]);
-        house.setDescription(tokens[2]);
-        house.setListingStart(tokens[3]);
-        house.setListingEnd(tokens[4]);
-        house.setConsumptionPts(std::stoi(tokens[5]));
+        string ownerId = tokens[0];
+        Member* owner = system->getMember(ownerId);
+
+        if (owner == nullptr) {
+            notify("Error: Owner with ID " + ownerId + " not found.");
+            continue;
+        }
+
+        house.setOwner(owner);
+
+        house.setId(tokens[1]);
+        house.setLocation(tokens[2]);
+        house.setDescription(tokens[3]);
+        house.setListingStart(tokens[4]);
+        house.setListingEnd(tokens[5]);
+        house.setConsumptionPts(std::stoi(tokens[6]));
 
         houses.push_back(house);
+        owner->setHouse(&houses.back());
     }
 
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Loaded " << houses.size() << " houses.");
+        notify("Loaded " + Colors::YELLOW + std::to_string(houses.size()) + Colors::GREEN + " houses.", Colors::GREEN);
 
     return true;
 }
@@ -695,7 +915,7 @@ bool System::loadRatings() {
     file.open(filePath, std::ios::in);
 
     if (!file.is_open()) {
-        logError("Error: " << filePath + " not found.");
+        notify("Error: " + filePath + " not found.", Colors::RED);
         return false;
     }
 
@@ -711,7 +931,7 @@ bool System::loadRatings() {
         }
 
         if (tokens.size() != 4) {
-            logError("Invalid rating format.");
+            notify("Error: Invalid Rating format.", Colors::RED);
             continue;
         }
 
@@ -727,7 +947,7 @@ bool System::loadRatings() {
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Loaded " << ratings.size() << " ratings.");
+        notify("Loaded " + Colors::YELLOW + std::to_string(ratings.size()) + Colors::GREEN + " ratings.", Colors::GREEN);
 
     return true;
 }
@@ -739,7 +959,7 @@ bool System::loadComments() {
     file.open(filePath, std::ios::in);
 
     if (!file.is_open()) {
-        logError("Error: " << filePath + " not found.");
+        notify("Error: " + filePath + " not found.", Colors::RED);
         return false;
     }
 
@@ -755,7 +975,7 @@ bool System::loadComments() {
         }
 
         if (tokens.size() != 4) {
-            logError("Invalid comment format.");
+            notify("Error: Invalid Comment format.", Colors::RED);
             continue;
         }
 
@@ -771,7 +991,7 @@ bool System::loadComments() {
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Loaded " << comments.size() << " comments.");
+        notify("Loaded " + Colors::YELLOW + std::to_string(comments.size()) + Colors::GREEN + " comments.", Colors::GREEN);
 
     return true;
 }
@@ -783,7 +1003,7 @@ bool System::loadRequests() {
     file.open(filePath, std::ios::in);
 
     if (!file.is_open()) {
-        logError("Error: " << filePath + " not found.");
+        notify("Error: " + filePath + " not found.", Colors::RED);
         return false;
     }
 
@@ -799,7 +1019,7 @@ bool System::loadRequests() {
         }
 
         if (tokens.size() != 3) {
-            logError("Invalid request format.");
+            notify("Error: Invalid Request format.", Colors::RED);
             continue;
         }
 
@@ -815,7 +1035,7 @@ bool System::loadRequests() {
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Loaded " << requests.size() << " requests.");
+        notify("Loaded " + Colors::YELLOW + std::to_string(requests.size()) + Colors::GREEN + " requests.", Colors::GREEN);
 
     return true;
 }
@@ -827,18 +1047,20 @@ bool System::saveMembers() {
     file.open(filePath, std::ios::out);
 
     if (!file.is_open()) {
-        logError("Error: " << filePath + " not found.");
+        notify("Error: " + filePath + " not found.", Colors::RED);
         return false;
     }
 
     for (Member member : members) {
-        file << member.getId() << "," << member.getUsername() << "," << member.getPassword() << "," << member.getFullName() << "," << member.getPhone() << newl;
+        file << member.getId() << "," << member.getUsername() << ","
+             << member.getPassword() << "," << member.getFullName() << ","
+             << member.getPhone() << newl;
     }
 
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Saved " << members.size() << " members.");
+        notify("Saved " + Colors::YELLOW + std::to_string(members.size()) + Colors::GREEN + " members.", Colors::GREEN);
 
     return true;
 }
@@ -850,18 +1072,21 @@ bool System::saveHouses() {
     file.open(filePath, std::ios::out);
 
     if (!file.is_open()) {
-        logError("Error: " << filePath + " not found.");
+        notify("Error: " + filePath + " not found.", Colors::RED);
         return false;
     }
 
     for (House house : houses) {
-        file << house.getLocation() << "," << house.getDescription() << "," << house.getListingStart() << "," << house.getListingEnd() << "," << house.getConsumptionPts() << newl;
+        file << house.getOwner()->getId() << ","
+             << house.getId() << "," << house.getLocation() << ","
+             << house.getDescription() << "," << house.getListingStart() << ","
+             << house.getListingEnd() << "," << house.getConsumptionPts() << newl;
     }
 
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Saved " << houses.size() << " houses.");
+        notify("Saved " + Colors::YELLOW + std::to_string(houses.size()) + Colors::GREEN + " houses.", Colors::GREEN);
 
     return true;
 }
@@ -873,18 +1098,19 @@ bool System::saveRatings() {
     file.open(filePath, std::ios::out);
 
     if (!file.is_open()) {
-        logError("Error: " << filePath + " not found.");
+        notify("Error: " + filePath + " not found.", Colors::RED);
         return false;
     }
 
     for (Rating rating : ratings) {
-        file << rating.getHouse() << "," << rating.getAuthor() << "," << rating.getContent() << newl;
+        file << rating.getHouse() << "," << rating.getAuthor()
+             << "," << rating.getContent() << newl;
     }
 
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Saved " << ratings.size() << " ratings.");
+        notify("Saved " + Colors::YELLOW + std::to_string(ratings.size()) + Colors::GREEN + " ratings.", Colors::GREEN);
 
     return true;
 }
@@ -896,18 +1122,19 @@ bool System::saveComments() {
     file.open(filePath, std::ios::out);
 
     if (!file.is_open()) {
-        logError("Error: " << filePath + " not found.");
+        notify("Error: " + filePath + " not found.", Colors::RED);
         return false;
     }
 
     for (Comment comment : comments) {
-        file << comment.getHouse() << "," << comment.getAuthor() << "," << comment.getContent() << newl;
+        file << comment.getHouse() << "," << comment.getAuthor()
+             << "," << comment.getContent() << newl;
     }
 
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Saved " << comments.size() << " comments.");
+        notify("Saved " + Colors::YELLOW + std::to_string(comments.size()) + Colors::GREEN + " comments.", Colors::GREEN);
 
     return true;
 }
@@ -919,18 +1146,19 @@ bool System::saveRequests() {
     file.open(filePath, std::ios::out);
 
     if (!file.is_open()) {
-        logError("Error: " << filePath + " not found.");
+        notify("Error: " + filePath + " not found.", Colors::RED);
         return false;
     }
 
     for (Request request : requests) {
-        file << request.getHouse() << "," << request.getRequester() << "," << request.getContent() << newl;
+        file << request.getHouse() << "," << request.getRequester()
+             << "," << request.getContent() << newl;
     }
 
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Saved " << requests.size() << " requests.");
+        notify("Saved " + Colors::YELLOW + std::to_string(requests.size()) + Colors::GREEN + " requests.", Colors::GREEN);
 
     return true;
 }
@@ -940,76 +1168,81 @@ bool System::initialize() {
     log(DIVIDER);
     skipLine();
 
-    logInfo("SYSTEM NOTIFICATION: Loading data..." << newl);
+    notify("Loading data...\n");
 
     if (!loadMembers()) {
-        logError("SYSTEM NOTIFICATION: Failed to load members.");
+        notify("Failed to load Members.", Colors::RED);
         return false;
     }
 
     if (!loadHouses()) {
-        logError("SYSTEM NOTIFICATION: Failed to load houses.");
+        notify("Failed to load Houses.", Colors::RED);
         return false;
     }
 
     if (!loadRatings()) {
-        logError("SYSTEM NOTIFICATION: Failed to load ratings.");
+        notify("Failed to load Ratings.", Colors::RED);
         return false;
     }
 
     if (!loadComments()) {
-        logError("SYSTEM NOTIFICATION: Failed to load comments.");
+        notify("Failed to load Comments.", Colors::RED);
         return false;
     }
 
     if (!loadRequests()) {
-        logError("SYSTEM NOTIFICATION: Failed to load requests.");
+        notify("Failed to load Requests.", Colors::RED);
         return false;
     }
 
     if (SHOW_PROCESSED_AMOUNT)
         skipLine();
 
-    logSuccess("SYSTEM NOTIFICATION: Data loaded." << newl);
+    notify("Data loaded.\n", Colors::GREEN);
+
     return true;
 }
 
 bool System::shutdown() {
     skipLine();
-    log(DIVIDER);
-    skipLine();
 
-    logInfo("SYSTEM NOTIFICATION: Saving data..." << newl);
+    notify("Saving data...\n");
 
     if (!saveMembers()) {
-        logError("SYSTEM NOTIFICATION: Failed to save members.");
+        notify("Failed to save members.", Colors::RED);
         return false;
     }
 
     if (!saveHouses()) {
-        logError("SYSTEM NOTIFICATION: Failed to save houses.");
+        notify("Failed to save houses.", Colors::RED);
         return false;
     }
 
     if (!saveRatings()) {
-        logError("SYSTEM NOTIFICATION: Failed to save ratings.");
+        notify("Failed to save ratings.", Colors::RED);
         return false;
     }
 
     if (!saveComments()) {
-        logError("SYSTEM NOTIFICATION: Failed to save comments.");
+        notify("Failed to save comments.", Colors::RED);
         return false;
     }
 
     if (!saveRequests()) {
-        logError("SYSTEM NOTIFICATION: Failed to save requests.");
+        notify("Failed to save requests.", Colors::RED);
         return false;
     }
 
     if (SHOW_PROCESSED_AMOUNT)
         skipLine();
 
-    logSuccess("SYSTEM NOTIFICATION: Data saved." << newl);
+    notify("Data saved.\n", Colors::GREEN);
+
+    log(DIVIDER);
+    skipLine();
+    notify("Exiting...", Colors::GREEN);
+    skipLine();
+
     return true;
 }
 
@@ -1052,13 +1285,73 @@ void System::showUserHouseDetails() {
 
     if (house == nullptr) {
         logInfo("You don't have any house on the system.");
+        skipLine();
+
+        string response;
+        illogInfo(Colors::GREEN << "Do you want to create one? (Y/N): ");
+        input(response);
+
+        if (response == "N" || response == "n")
+            return;
+
+        skipLine();
+        currentMember->setupHouse();
         return;
     }
 
+    logInfo("ID: " << Colors::GREEN << house->getId());
     logInfo("Location: " << Colors::GREEN << house->getLocation());
     logInfo("Description: " << Colors::GREEN << house->getDescription());
     logInfo("Listing start: " << Colors::GREEN << house->getListingStart());
     logInfo("Listing end: " << Colors::GREEN << house->getListingEnd());
     logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
+
+    skipLine();
+    std::system("PAUSE");  // Only works on Windows.
+}
+
+Member* System::getMember(string id) {
+    for (Member& member : members) {
+        if (member.getId().compare(id) == 0)
+            return &member;
+    }
+
+    return nullptr;
+}
+
+House* System::getHouse(string id) {
+    for (House& house : houses) {
+        if (house.getId() == id)
+            return &house;
+    }
+
+    return nullptr;
+}
+
+Rating* System::getRating(string id) {
+    for (Rating& rating : ratings) {
+        if (rating.getId() == id)
+            return &rating;
+    }
+
+    return nullptr;
+}
+
+Comment* System::getComment(string id) {
+    for (Comment& comment : comments) {
+        if (comment.getId() == id)
+            return &comment;
+    }
+
+    return nullptr;
+}
+
+Request* System::getRequest(string id) {
+    for (Request& request : requests) {
+        if (request.getId() == id)
+            return &request;
+    }
+
+    return nullptr;
 }
 }  // namespace HouseExchanger

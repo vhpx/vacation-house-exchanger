@@ -25,6 +25,7 @@
 
 // Input string with/without spaces
 #define inputStr(x)            \
+    illog(Colors::CYAN);       \
     std::cin.ignore();         \
     std::getline(std::cin, x); \
     illog(Colors::RESET)
@@ -38,10 +39,10 @@
 namespace HouseExchanger {
 void mainLoop() {
     System *system = System::getInstance();
-    int choice = 0;
+    int choice = -1;
 
     // Execute main loop
-    while (choice != -1) {
+    while (choice != 0) {
         // User authentication status
         bool isLoggedIn = system->isLoggedIn();
 
@@ -73,17 +74,21 @@ void mainLoop() {
         log(DIVIDER);
 
         // Process user choice.
+        bool skipPause = false;
+
         if (isLoggedIn) {
             //* User is logged in.
             Member *member = system->getCurrentMember();
 
             switch (choice) {
                 case 1:
-                    system->showUserProfile();
+                    profileLoop();
+                    skipPause = true;
                     break;
 
                 case 2:
                     system->showUserHouseDetails();
+                    skipPause = true;
                     break;
 
                 case 3:
@@ -114,11 +119,11 @@ void mainLoop() {
 
             switch (choice) {
                 case 1:
-                    guest.signUp();
+                    guest.login();
                     break;
 
                 case 2:
-                    guest.login();
+                    guest.signUp();
                     break;
 
                 case 3:
@@ -142,14 +147,89 @@ void mainLoop() {
         }
 
         // Wait for user to press enter.
-        skipLine();
-        std::system("PAUSE");  // Only works on Windows.
+        if (!skipPause) {
+            skipLine();
+            std::system("PAUSE");  // Only works on Windows.
+        }
 
         // Clear screen
         std::system("cls");
     }
+}
 
-    skipLine();
-    logInfo("SYSTEM NOTIFICATION: Exiting...");
+void profileLoop() {
+    System *system = System::getInstance();
+    Member *currentUser = system->getCurrentMember();
+
+    int choice = -1;
+
+    // Execute profile loop
+    while (choice != 0) {
+        // Clear screen
+        std::system("cls");
+
+        // Display the profile menu
+        displayProfileMenu();
+
+        // Get user choice.
+        illogInfo("Enter your choice: ");
+
+        std::string buffer;
+        input(buffer);
+
+        // Check if the user entered an integer.
+        if (checkIfInteger(buffer)) {
+            choice = std::stoi(buffer);
+        } else {
+            logError("Error: Invalid input. Please enter an integer.");
+
+            // Wait for user to press enter.
+            skipLine();
+            std::system("PAUSE");  // Only works on Windows.
+
+            continue;
+        }
+
+        skipLine();
+        log(DIVIDER);
+
+        // Process user choice.
+        switch (choice) {
+            case 1:
+                currentUser->updateProfile();
+                break;
+
+            case 2:
+                currentUser->changePassword();
+                break;
+
+            case 3:
+                if (currentUser->deleteProfile()) return;
+                break;
+
+            case 0:
+                // Exit profile loop
+                break;
+
+            default:
+                logError("Error: Invalid choice!");
+                choice = -1;
+
+                skipLine();
+                std::system("PAUSE");  // Only works on Windows.
+                break;
+        }
+
+        // Exit the loop if the user
+        // wishes to quit the program.
+        if (choice == 0)
+            break;
+    }
+
+    // Wait for user to press enter.
+    if (choice != 0) {
+        skipLine();
+        std::system("PAUSE");  // Only works on Windows.
+    }
 }
 }  // namespace HouseExchanger

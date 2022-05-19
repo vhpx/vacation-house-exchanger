@@ -1,7 +1,6 @@
 #include "utils.h"
 
 #include <iostream>
-#include <string>
 
 #include "classes.h"
 #include "colors.h"
@@ -27,6 +26,7 @@ using namespace HouseExchanger;
 
 // Input string with/without spaces
 #define inputStr(x)            \
+    illog(Colors::CYAN);       \
     std::cin.ignore();         \
     std::getline(std::cin, x); \
     illog(Colors::RESET)
@@ -51,18 +51,20 @@ using namespace HouseExchanger;
 #define AUTHOR4_INFO "s3927460" << Colors::CYAN << ", " << Colors::GREEN << "Nguyen Ngoc Luong"
 
 namespace HouseExchanger {
+//* Utilitiy functions
 bool checkIfInteger(const std::string& str) {
     std::string::const_iterator it = str.begin();
     while ((it == str.begin() && *it == '-') || (it != str.end() && std::isdigit(*it))) ++it;
     return !str.empty() && it == str.end();
 }
 
+//* Core
 void displayWelcomeMsg() {
     log(DIVIDER);
     skipLine();
 
-    log(Colors::CYAN << APP_HEADER);
-    log(APP_NAME << newl);
+    log(Colors::CYAN << Colors::BOLD << "     " << APP_HEADER);
+    log("  " << APP_NAME << Colors::RESET << newl);
 
     logInfo("Instructor: " << Colors::GREEN << LECTURER_NAME);
     logInfo("Group: " << Colors::GREEN << GROUP_NAME << newl);
@@ -80,21 +82,36 @@ void displayWelcomeMsg() {
     std::system("cls");
 }
 
+void displayAppHeader() {
+    System* system = System::getInstance();
+    bool isLoggedIn = system->isLoggedIn();
+
+    log(DIVIDER);
+    logInfo(Colors::BOLD << "  " << APP_NAME);
+
+    log(DIVIDER);
+    if (isLoggedIn) {
+        logSuccess("\tLogged in as: "
+                   << Colors::YELLOW
+                   << system->getCurrentMember()->getUsername());
+    } else {
+        logError("\tYou are not logged in.");
+    }
+}
+
+void displayMenuOptions(std::vector<std::string>& options) {
+    for (int i = 0; i < options.size(); i++)
+        logInfo(Colors::BOLD << "[" << i + 1 << "] " << Colors::GREEN << options[i]);
+}
+
+//* Menus
 void displayDefaultMenu() {
     System* system = System::getInstance();
 
     bool isLoggedIn = system->isLoggedIn();
     bool isAdmin = system->isAdmin();
 
-    log(DIVIDER);
-    logInfo(Colors::BOLD << "  " << APP_NAME);
-
-    if (isLoggedIn || isAdmin) {
-        log(DIVIDER);
-        logSuccess("\tLogged in as: "
-                   << Colors::YELLOW
-                   << system->getCurrentMember()->getUsername());
-    }
+    displayAppHeader();
 
     log(DIVIDER);
     log(Colors::BLUE << Colors::BOLD
@@ -102,17 +119,47 @@ void displayDefaultMenu() {
                      << Colors::RESET << newl);
 
     if (isLoggedIn) {
-        logInfo("1. " << Colors::CYAN << "Account profile");
-        logInfo("2. " << Colors::CYAN << "House profile");
-        logInfo("3. " << Colors::CYAN << "Browse houses");
-        logInfo("4. " << Colors::CYAN << "Logout");
+        std::vector<std::string> options = {
+            "Account profile",
+            "House profile",
+            "Browse houses",
+            "Logout"};
+
+        displayMenuOptions(options);
     } else {
-        logInfo("1. " << Colors::CYAN << "Sign up");
-        logInfo("2. " << Colors::CYAN << "Login");
-        logInfo("3. " << Colors::CYAN << "Browse houses");
+        std::vector<std::string> options = {
+            "Login",
+            "Register",
+            "Browse houses"};
+
+        displayMenuOptions(options);
     }
 
-    logInfo(newl << "0. " << Colors::RED << "Exit program");
+    logInfo(newl << Colors::BOLD << "[0] " << Colors::RED << "Exit program");
+    log(DIVIDER << newl);
+}
+
+void displayProfileMenu() {
+    System* system = System::getInstance();
+
+    displayAppHeader();
+
+    log(DIVIDER);
+    system->showUserProfile();
+
+    log(DIVIDER);
+    log(Colors::BLUE << Colors::BOLD
+                     << "\tPlease select an option"
+                     << Colors::RESET << newl);
+
+    std::vector<std::string> options = {
+        "Update profile",
+        "Change password",
+        "Delete account"};
+
+    displayMenuOptions(options);
+
+    logInfo(newl << Colors::BOLD << "[0] " << Colors::RED << "Back");
     log(DIVIDER << newl);
 }
 }  // namespace HouseExchanger

@@ -7,13 +7,14 @@
 using std::string;
 using std::vector;
 
+namespace HouseExchanger {
+//* Enums
 enum RequestStatus {
     PENDING,
     APPROVED,
     DENIED
 };
 
-namespace HouseExchanger {
 //* prototype classes
 class Member;
 class House;
@@ -23,6 +24,8 @@ class Request;
 
 class House {
    private:
+    Member* owner = nullptr;
+
     string id = "";
     string location = "";
     string description = "";
@@ -34,13 +37,14 @@ class House {
     vector<Rating*> ratings;
 
    public:
-    // Default constructor
+    //* Default constructor
     House();
 
-    // Destructor
+    //* Destructor
     ~House();
 
-    // Setters
+    //* Setters
+    void setOwner(Member* owner);
     void setId(string id);
     void setLocation(string location);
     void setDescription(string description);
@@ -50,7 +54,8 @@ class House {
 
     void setConsumptionPts(int points);
 
-    // Getters
+    //* Getters
+    Member* getOwner();
     string getId();
     string getLocation();
     string getDescription();
@@ -63,13 +68,13 @@ class House {
 
 class Guest {
    public:
-    // Default constructor
+    //* Default constructor
     Guest();
 
-    // Destructor
+    //* Destructor
     ~Guest();
 
-    // Authentication methods
+    //* Authentication methods
     virtual bool signUp();
     virtual bool login();
 
@@ -84,41 +89,46 @@ class Member : public Guest {
     string fullName = "";
     string phone = "";
 
+    House* house = nullptr;
     int creditPoint = 500;
 
-    House* house = nullptr;
-
    public:
-    // Default constructor
+    //* Default constructor
     Member();
 
-    // Destructor
+    //* Destructor
     ~Member();
 
-    // Authentication methods
+    //* Authentication methods
     // Override Guest methods to display error message.
     bool signUp();
     bool login();
     bool logout();
 
-    // Setters
+    bool verifyPassword(string password);
+    bool changePassword();
+
+    bool updateProfile();
+    bool deleteProfile();
+
+    //* Setters
     void setId(string id);
     void setUsername(string username);
     void setPassword(string password);
     void setFullName(string fullName);
     void setPhone(string phone);
+    void setHouse(House* house);
 
-    // Getters
+    //* Getters
     string getId();
     string getUsername();
     string getPassword();
     string getFullName();
     string getPhone();
-
+    House* getHouse();
     int getCreditPoint();
 
-    House* getHouse();
-
+    void setupHouse();
     void viewHouseDetail(House* house);
 };
 
@@ -246,8 +256,17 @@ class System {
     bool login(string username, string password);
     bool logout();
 
+    bool changePassword(string newPassword, Member* member);
+    bool changePassword(string oldPassword, string newPassword);
+
+    bool updateProfile(Member* member);
+
+    bool deleteProfile(Member* member);
+    bool deleteProfile(string password);
+
     // Utility methods
     string generateId();
+    void notify(string message, string color);
 
     // Resouce management methods
     void showHouses();
@@ -257,6 +276,18 @@ class System {
     Rating* addRating(Rating rating);
     Comment* addComment(Comment comment);
     Request* addRequest(Request request);
+
+    Member* getMember(string id);
+    House* getHouse(string id);
+    Rating* getRating(string id);
+    Comment* getComment(string id);
+    Request* getRequest(string id);
+
+    // void deleteMember(Member* member);
+    // void deleteHouse(House* house);
+    // void deleteRating(Rating* rating);
+    // void deleteComment(Comment* comment);
+    // void deleteRequest(Request* request);
 
     // Loading methods
     bool loadMembers();
