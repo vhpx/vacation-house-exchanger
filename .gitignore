@@ -15,6 +15,3 @@ tempCodeRunnerFile.cpp
 *.exe
 *.txt
 *.out
-
-# Include Files
-!program.exe
