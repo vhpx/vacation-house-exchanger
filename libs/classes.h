@@ -75,8 +75,8 @@ class Guest {
     ~Guest();
 
     //* Authentication methods
-    virtual bool signUp();
-    virtual bool login();
+    virtual Member* signUp();
+    virtual Member* login();
 
     virtual void viewHouseDetail(House* house);
 };
@@ -101,8 +101,8 @@ class Member : public Guest {
 
     //* Authentication methods
     // Override Guest methods to display error message.
-    bool signUp();
-    bool login();
+    Member* signUp();
+    Member* login();
     bool logout();
 
     bool verifyPassword(string password);
@@ -128,7 +128,7 @@ class Member : public Guest {
     House* getHouse();
     int getCreditPoint();
 
-    void setupHouse();
+    bool setupHouse();
     void viewHouseDetail(House* house);
 };
 
@@ -252,8 +252,8 @@ class System {
     static System* getInstance();
 
     // Authentication methods
-    bool signUp(Member member);
-    bool login(string username, string password);
+    Member* signUp(Member member);
+    Member* login(string username, string password);
     bool logout();
 
     bool changePassword(string newPassword, Member* member);

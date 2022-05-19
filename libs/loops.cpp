@@ -122,9 +122,27 @@ void mainLoop() {
                     guest.login();
                     break;
 
-                case 2:
-                    guest.signUp();
+                case 2: {
+                    Member *newMember = guest.signUp();
+
+                    string response;
+
+                    skipLine();
+                    illogInfo("Would you like to list a house now? (Y/N): ");
+                    input(response);
+
+                    if (response == "Y" || response == "y") {
+                        skipLine();
+                        skipPause = true;
+
+                        while (!newMember->setupHouse()) {
+                            std::system("cls");
+                            logError("Error: Failed to setup house. Please try again.");
+                            skipLine();
+                        }
+                    }
                     break;
+                }
 
                 case 3:
                     system->showHouses();

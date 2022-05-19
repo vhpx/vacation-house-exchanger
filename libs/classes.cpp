@@ -167,7 +167,7 @@ Guest::Guest() {}
 // Destructor
 Guest::~Guest() {}
 
-bool Guest::signUp() {
+Member* Guest::signUp() {
     //* Sign up
     // Create a new member object to store the data.
     Member member;
@@ -199,7 +199,7 @@ bool Guest::signUp() {
     return System::getInstance()->signUp(member);
 }
 
-bool Guest::login() {
+Member* Guest::login() {
     //* Login
     // Get user input.
     string username, password;
@@ -226,16 +226,16 @@ Member::Member() {}
 // Destructor
 Member::~Member() {}
 
-bool Member::signUp() {
+Member* Member::signUp() {
     logError("You are already logged in.");
     logError("Operation failed.");
-    return false;
+    return this;
 }
 
-bool Member::login() {
+Member* Member::login() {
     logError("You are already logged in.");
     logError("Operation failed.");
-    return false;
+    return this;
 }
 
 bool Member::logout() {
@@ -376,7 +376,7 @@ House* Member::getHouse() {
     return this->house;
 }
 
-void Member::setupHouse() {
+bool Member::setupHouse() {
     // Get user input.
     string location, description, listingStart, listingEnd;
     int consumptionPts;
@@ -386,7 +386,7 @@ void Member::setupHouse() {
 
     illogInfo("House location: ");
 
-    std::cin.ignore();
+    if (std::cin.peek() == '\n') std::cin.ignore();
     inputStr(location);
 
     // Check if the location is available.
@@ -397,7 +397,7 @@ void Member::setupHouse() {
         skipLine();
         std::system("PAUSE");  // Only works on Windows.
 
-        return;
+        return false;
     }
 
     illogInfo("House description: ");
@@ -436,6 +436,8 @@ void Member::setupHouse() {
 
     skipLine();
     std::system("PAUSE");  // Only works on Windows.
+
+    return savedHouse != nullptr;
 }
 
 void Member::viewHouseDetail(House* house) {
@@ -620,12 +622,12 @@ void System::notify(string message, string color = Colors::YELLOW) {
 }
 
 // Authentication methods
-bool System::signUp(Member member) {
+Member* System::signUp(Member member) {
     Member* newMember = addMember(member);
 
     if (newMember == nullptr) {
         logError(newl << "Sign up failed.");
-        return false;
+        return nullptr;
     }
 
     // Update current member
@@ -634,10 +636,10 @@ bool System::signUp(Member member) {
 
     // Display success message
     logSuccess(newl << "Sign up successful.");
-    return true;
+    return newMember;
 }
 
-bool System::login(string username, string password) {
+Member* System::login(string username, string password) {
     skipLine();
 
     // Check if username exists
@@ -651,17 +653,17 @@ bool System::login(string username, string password) {
 
                 // Display success message
                 logSuccess("Login successful.");
-                return true;
+                return &members[i];
             } else {
                 logError("Incorrect password.");
-                return false;
+                return nullptr;
             }
         }
     }
 
     // Display failure message
     logError("Username not found.");
-    return false;
+    return nullptr;
 }
 
 bool System::logout() {
