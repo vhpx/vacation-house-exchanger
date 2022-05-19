@@ -115,12 +115,7 @@ class Guest {
             log("Enter username and password: ");
             inputStr(username);    inputStr(password);
 
-            // if(username == ad_username && )
-
-            // for (size_t i = 0; i < count; i++)
-            // {
-            //     /* code */
-            // }
+            
             
         }
 
@@ -167,7 +162,7 @@ class Member : public Guest {
     // get average occupier-rating score
         double getRatingScore() {
             double sum = 0;
-            for (auto eachHouseRate: houseRatingScores) {
+            for (auto eachHouseRate : houseRatingScores) {
                 sum += eachHouseRate->value;
             }
             return sum / houseRatingScores.size();
