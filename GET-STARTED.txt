@@ -1,6 +1,6 @@
-> Please run the following commands to compile the project:
+> Please run the following command to compile the project:
 
-g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp -o program.exe
+g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp ./libs/colors.cpp -o program.exe
 
 ---------------------------------------------------------------------
 
