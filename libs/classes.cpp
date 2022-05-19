@@ -13,6 +13,12 @@
 #define illog(x) std::cout << x        // In-line print
 #define skipLine() illog(newl)         // Skip 1 line in I/O
 #define log(x) std::cout << x << newl  // Print with newline
+#define input(x) std::cin >> x         // Input
+#define inputStr(x)    \
+    std::cin.ignore(); \
+    std::getline(std::cin, x)  // Input string
+
+#define DIVIDER "---------------------------------------"
 
 using std::string;
 using std::vector;
@@ -122,15 +128,54 @@ Guest::Guest() {}
 // Destructor
 Guest::~Guest() {}
 
-void Guest::signUp() {}
-void Guest::login() {}
+bool Guest::signUp() {
+    //* Sign up
+    // Create a new member object to store the data.
+    Member member;
+
+    // Get user input.
+    string username, password, fullName, phone;
+
+    illog("Enter your username: ");
+    input(username);
+
+    illog("Enter your password: ");
+    input(password);
+
+    illog("Enter your full name: ");
+    inputStr(fullName);
+
+    illog("Enter your phone number: ");
+    input(phone);
+
+    // Set member data.
+    member.setUsername(username);
+    member.setPassword(password);
+    member.setFullName(fullName);
+    member.setPhone(phone);
+
+    // Sign up the member through the System.
+    return System::getInstance()->signUp(member);
+}
+
+bool Guest::login() {
+    //* Login
+    // Get user input.
+    string username, password;
+
+    illog("Enter your username: ");
+    input(username);
+
+    illog("Enter your password: ");
+    input(password);
+
+    // Login the member through the System.
+    return System::getInstance()->login(username, password);
+}
 
 void Guest::viewHouseDetail(House* house) {
     log("Location: " + house->getLocation());
     log("Description: " + house->getDescription());
-    log("Listing start: " + house->getListingStart());
-    log("Listing end: " + house->getListingEnd());
-    log("Consumption points: " + std::to_string(house->getConsumptionPts()));
 }
 
 //* Member class
@@ -140,7 +185,27 @@ Member::Member() {}
 // Destructor
 Member::~Member() {}
 
+bool Member::signUp() {
+    log("You are already logged in.");
+    log("Operation failed.");
+    return false;
+}
+
+bool Member::login() {
+    log("You are already logged in.");
+    log("Operation failed.");
+    return false;
+}
+
+bool Member::logout() {
+    return System::getInstance()->logout();
+}
+
 // Setters
+void Member::setId(string id) {
+    this->id = id;
+}
+
 void Member::setUsername(string username) {
     this->username = username;
 }
@@ -158,6 +223,10 @@ void Member::setPhone(string phone) {
 }
 
 // Getters
+string Member::getId() {
+    return this->id;
+}
+
 string Member::getUsername() {
     return this->username;
 }
@@ -180,6 +249,14 @@ int Member::getCreditPoint() {
 
 House* Member::getHouse() {
     return this->house;
+}
+
+void Member::viewHouseDetail(House* house) {
+    log("Location: " + house->getLocation());
+    log("Description: " + house->getDescription());
+    log("Listing start: " + house->getListingStart());
+    log("Listing end: " + house->getListingEnd());
+    log("Consumption points: " + std::to_string(house->getConsumptionPts()));
 }
 
 //* Rating class
@@ -296,8 +373,100 @@ System::System() {}
 // Destructor
 System::~System() {}
 
+// Singleton instance
+System* System::instancePtr = nullptr;
+
+// Static getInstance method
+System* System::getInstance() {
+    if (instancePtr == nullptr) {
+        instancePtr = new System();
+    }
+    return instancePtr;
+}
+
+// Current user methods
+void System::setCurrentMember(Member* member) {
+    this->currentMember = member;
+}
+
+void System::setIsLoggedIn(bool isLoggedIn) {
+    this->isUserLoggedIn = isLoggedIn;
+}
+
+void System::setIsAdmin(bool isAdmin) {
+    this->isUserAdmin = isAdmin;
+}
+
+// Utility methods
 string System::generateId() {
     return uuid::generate_uuid_v4();
+}
+
+// Authentication methods
+bool System::signUp(Member member) {
+    skipLine();
+
+    // Check if username is already taken
+    for (int i = 0; i < members.size(); i++) {
+        if (members[i].getUsername() == member.getUsername()) {
+            log("Username already taken.");
+            log("Operation failed.");
+            return false;
+        }
+    }
+
+    // Generate member ID
+    string id = generateId();
+    member.setId(id);
+
+    // Add member to members vector
+    members.push_back(member);
+    Member* savedMember = &members.back();
+
+    // Update current member
+    setCurrentMember(savedMember);
+    setIsLoggedIn(true);
+
+    // Display success message
+    log("Sign up successful.");
+    return true;
+}
+
+bool System::login(string username, string password) {
+    skipLine();
+
+    // Check if username exists
+    for (int i = 0; i < members.size(); i++) {
+        if (members[i].getUsername().compare(username) == 0) {
+            // Check if password is correct
+            if (members[i].getPassword().compare(password) == 0) {
+                // Update current member
+                setCurrentMember(&members[i]);
+                setIsLoggedIn(true);
+
+                // Display success message
+                log("Login successful.");
+                return true;
+            } else {
+                log("Incorrect password.");
+                return false;
+            }
+        }
+    }
+
+    // Display failure message
+    log("Username not found.");
+    return false;
+}
+
+bool System::logout() {
+    // Update current member
+    setCurrentMember(nullptr);
+    setIsLoggedIn(false);
+
+    // Display success message
+    log("Logout successful.");
+    return true;
 }
 
 bool System::loadMembers() {
@@ -329,6 +498,7 @@ bool System::loadMembers() {
 
         Member member;
 
+        member.setId(tokens[0]);
         member.setUsername(tokens[1]);
         member.setPassword(tokens[2]);
         member.setFullName(tokens[3]);
@@ -515,7 +685,7 @@ bool System::saveMembers() {
     }
 
     for (Member member : members) {
-        file << member.getUsername() << "," << member.getPassword() << "," << member.getFullName() << "," << member.getPhone() << newl;
+        file << member.getId() << "," << member.getUsername() << "," << member.getPassword() << "," << member.getFullName() << "," << member.getPhone() << newl;
     }
 
     file.close();
@@ -599,7 +769,10 @@ bool System::saveRequests() {
 }
 
 bool System::loadAll() {
-    log(newl << "SYSTEM NOTIFICATION: Loading data..." << newl);
+    skipLine();
+    log(DIVIDER);
+
+    log(newl << "SYSTEM NOTIFICATION: Loading data...");
 
     if (!loadMembers()) {
         log("SYSTEM NOTIFICATION: Failed to load members.");
@@ -626,12 +799,15 @@ bool System::loadAll() {
         return false;
     }
 
-    log("SYSTEM NOTIFICATION: Data loaded.");
+    log("SYSTEM NOTIFICATION: Data loaded." << newl);
     return true;
 }
 
 bool System::saveAll() {
-    log(newl << "SYSTEM NOTIFICATION: Saving data..." << newl);
+    skipLine();
+    log(DIVIDER);
+
+    log(newl << "SYSTEM NOTIFICATION: Saving data...");
 
     if (!saveMembers()) {
         log("SYSTEM NOTIFICATION: Failed to save members.");
@@ -660,5 +836,18 @@ bool System::saveAll() {
 
     log("SYSTEM NOTIFICATION: Data saved." << newl);
     return true;
+}
+
+//* Current user
+Member* System::getCurrentMember() {
+    return currentMember;
+}
+
+bool System::isLoggedIn() {
+    return currentMember != nullptr;
+}
+
+bool System::isAdmin() {
+    return isUserAdmin;
 }
 }  // namespace HouseExchanger

@@ -60,16 +60,16 @@ class House {
 };
 
 class Guest {
-   private:
-    void signUp();
-    void login();
-
    public:
     // Default constructor
     Guest();
 
     // Destructor
     ~Guest();
+
+    // Authentication methods
+    virtual bool signUp();
+    virtual bool login();
 
     virtual void viewHouseDetail(House* house);
 };
@@ -93,13 +93,21 @@ class Member : public Guest {
     // Destructor
     ~Member();
 
+    // Authentication methods
+    // Override Guest methods to display error message.
+    bool signUp();
+    bool login();
+    bool logout();
+
     // Setters
+    void setId(string id);
     void setUsername(string username);
     void setPassword(string password);
     void setFullName(string fullName);
     void setPhone(string phone);
 
     // Getters
+    string getId();
     string getUsername();
     string getPassword();
     string getFullName();
@@ -108,6 +116,8 @@ class Member : public Guest {
     int getCreditPoint();
 
     House* getHouse();
+
+    void viewHouseDetail(House* house);
 };
 
 class Rating {
@@ -190,6 +200,13 @@ class Comment {
 
 class System {
    private:
+    // Singleton instance
+    static System* instancePtr;
+
+    // Default constructor
+    System();
+
+    // System data
     vector<string> availableLocations = {"Hanoi", "Saigon", "Da Nang"};
 
     vector<Member> members;
@@ -198,14 +215,30 @@ class System {
     vector<Comment> comments;
     vector<Request> requests;
 
-   public:
-    // Default constructor
-    System();
+    // Current user data
+    Member* currentMember = nullptr;
+    bool isUserLoggedIn = false;
+    bool isUserAdmin = false;
 
+    // Setters
+    void setCurrentMember(Member* member);
+    void setIsLoggedIn(bool isLoggedIn);
+    void setIsAdmin(bool isAdmin);
+
+   public:
+    //* System methods
     // Destructor
     ~System();
 
-    // Utility functions
+    // Singleton pattern
+    static System* getInstance();
+
+    // Authentication methods
+    bool signUp(Member member);
+    bool login(string username, string password);
+    bool logout();
+
+    // Utility methods
     string generateId();
 
     // Loading methods
@@ -225,6 +258,11 @@ class System {
     // I/O bundle
     bool loadAll();
     bool saveAll();
+
+    //* Current user
+    Member* getCurrentMember();
+    bool isLoggedIn();
+    bool isAdmin();
 };
 }  // namespace HouseExchanger
 

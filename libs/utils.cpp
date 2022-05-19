@@ -42,23 +42,28 @@ void displayWelcomeMsg() {
     log(AUTHOR4_INFO);
 
     skipLine();
-    illog(DIVIDER);
 }
 
 void displayMenu(bool isLoggedIn) {
+    illog(DIVIDER);
     skipLine();
     log("\tPlease select an option" << newl);
 
     if (isLoggedIn) {
-        log("1. Search for a member");
-        log("2. View account details");
-        log("3. Logout");
-        log("4. Exit program");
+        log("1. List your house");
+        log("2. Browse houses");
+        log("3. View account details");
+        log("4. Logout");
+
+        log(newl << "-1. Exit program");
     } else {
         log("1. Sign up");
         log("2. Login");
         log("3. Browse houses");
-        log("4. Exit program" << newl);
+
+        log(newl << "-1. Exit program");
     }
+
+    log(DIVIDER << newl);
 }
 }  // namespace HouseExchanger

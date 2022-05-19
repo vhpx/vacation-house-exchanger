@@ -17,4 +17,7 @@ tempCodeRunnerFile.cpp
 *.out
 
 # Include Files
-!program.exe
+!GET-STARTED.txt
+
+# Preferences, caches, logs
+.vscode/
