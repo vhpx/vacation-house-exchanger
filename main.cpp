@@ -37,7 +37,7 @@ int main() {
     // The main loop is a while loop that runs until the user quits.
     int choice = 0;
 
-    while (choice != 4) {
+    while (choice != -1) {
         // User authentication status
         bool isLoggedIn = system->isLoggedIn();
 
@@ -66,11 +66,15 @@ int main() {
                     break;
 
                 case 3:
-                    member->logout();
+                    log("Feature not yet implemented.");
                     break;
 
                 case 4:
-                    // Exit
+                    member->logout();
+                    break;
+
+                case -1:
+                    // Exit program
                     break;
 
                 default:
@@ -80,7 +84,7 @@ int main() {
             }
 
             // Exit the loop the user wishes to quit the program.
-            if (choice == 4)
+            if (choice == -1)
                 break;
         } else {
             //* User is not logged in.
@@ -100,8 +104,8 @@ int main() {
                     log("Feature not yet implemented.");
                     break;
 
-                case 4:
-                    // Exit
+                case -1:
+                    // Exit program
                     break;
 
                 default:
@@ -111,7 +115,7 @@ int main() {
             }
 
             // Exit the loop the user wishes to quit the program.
-            if (choice == 4)
+            if (choice == -1)
                 break;
         }
 
