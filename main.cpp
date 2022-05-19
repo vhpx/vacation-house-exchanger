@@ -66,8 +66,6 @@ int main() {
                     break;
 
                 case 3:
-                    // Logout
-                    log("Logging out...");
                     member->logout();
                     break;
 
