@@ -1,6 +1,6 @@
 > Please run the following command to compile the project:
 
-g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp ./libs/colors.cpp -o program.exe
+g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp ./libs/loop.cpp ./libs/colors.cpp -o program.exe
 
 ---------------------------------------------------------------------
 
@@ -12,4 +12,4 @@ g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp ./libs/colors.cpp -o program.ex
 
 You can also run the following command to compile and run the program:
 
-g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp ./libs/colors.cpp -o program.exe ; .\program.exe
+g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp ./libs/loop.cpp ./libs/colors.cpp -o program.exe ; .\program.exe

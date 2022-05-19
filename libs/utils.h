@@ -3,5 +3,5 @@
 namespace HouseExchanger {
 bool checkIfInteger(const std::string& str);
 void displayWelcomeMsg();
-void displayMenu();
+void displayDefaultMenu();
 }  // namespace HouseExchanger

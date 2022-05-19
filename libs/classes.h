@@ -272,9 +272,9 @@ class System {
     bool saveComments();
     bool saveRequests();
 
-    // I/O bundle
-    bool loadAll();
-    bool saveAll();
+    // System control methods
+    bool initialize();
+    bool shutdown();
 
     //* Current user
     Member* getCurrentMember();
