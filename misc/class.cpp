@@ -26,10 +26,12 @@ class System;
 
 class Rating {
    private:
-      public:
-    // constructors
     double value;
-    Rating(int value);
+    string id;
+    Member *author;;
+   public:
+    // constructors
+    Rating(double value, string id, Member *author);
     int getScore();
 };
 
