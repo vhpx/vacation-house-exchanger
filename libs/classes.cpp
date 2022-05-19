@@ -965,7 +965,10 @@ bool System::loadAll() {
         return false;
     }
 
-    logSuccess(newl << "SYSTEM NOTIFICATION: Data loaded." << newl);
+    if (SHOW_PROCESSED_AMOUNT)
+        skipLine();
+
+    logSuccess("SYSTEM NOTIFICATION: Data loaded." << newl);
     return true;
 }
 
@@ -1001,7 +1004,10 @@ bool System::saveAll() {
         return false;
     }
 
-    logSuccess(newl << "SYSTEM NOTIFICATION: Data saved." << newl);
+    if (SHOW_PROCESSED_AMOUNT)
+        skipLine();
+
+    logSuccess("SYSTEM NOTIFICATION: Data saved." << newl);
     return true;
 }
 
