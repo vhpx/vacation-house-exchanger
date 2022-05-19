@@ -6,29 +6,52 @@
 #include <sstream>
 #include <string>
 
-//* Helper preprocessor macros
-// I/O macros
-#define newl "\n"  // skip 1 line
+#include "colors.h"
 
-#define illog(x) std::cout << x        // In-line print
-#define skipLine() illog(newl)         // Skip 1 line in I/O
-#define log(x) std::cout << x << newl  // Print with newline
-#define input(x) std::cin >> x         // Input
-#define inputStr(x)    \
-    std::cin.ignore(); \
-    std::getline(std::cin, x)  // Input string
+//* Constants
+// Preferences
+#define SHOW_PROCESSED_AMOUNT false  // Log out the amount of loaded / saved data
 
-#define DIVIDER "---------------------------------------"
-
-using std::string;
-using std::vector;
-
+// Data
 const string DATA_PATH = "data/";
 
 const string MEMBERS_FILE = "members.dat";
 const string HOUSES_FILE = "houses.dat";
 const string RATINGS_FILE = "ratings.dat";
 const string COMMENTS_FILE = "comments.dat";
+
+//* Helper preprocessor macros
+// I/O macros
+#define newl "\n"  // skip 1 line
+#define DIVIDER "---------------------------------------"
+
+#define illog(x) std::cout << x  // In-line print (DEFAULT)
+#define skipLine() illog(newl)   // Skip 1 line in terminal
+
+#define illogInfo(x) std::cout << Colors::YELLOW << x << Colors::RESET    // In-line print (YELLOW)
+#define illogError(x) std::cout << Colors::RED << x << Colors::RESET      // In-line print (RED)
+#define illogSuccess(x) std::cout << Colors::GREEN << x << Colors::RESET  // In-line print (GREEN)
+
+#define log(x) illog(x << newl)                // Print with newline (DEFAULT)
+#define logInfo(x) illogInfo(x << newl)        // Print with newline (YELLOW)
+#define logError(x) illogError(x << newl)      // Print with newline (RED)
+#define logSuccess(x) illogSuccess(x << newl)  // Print with newline (GREEN)
+
+// Input string with/without spaces
+#define inputStr(x)            \
+    std::cin.ignore();         \
+    std::getline(std::cin, x); \
+    illog(Colors::RESET)
+
+// Input string with spaces or any other types
+#define input(x)         \
+    illog(Colors::CYAN); \
+    std::cin >> x;       \
+    illog(Colors::RESET)
+
+using std::string;
+using std::vector;
+
 const string REQUESTS_FILE = "requests.dat";
 
 string getFilePath(const string& fileName) {
@@ -80,6 +103,10 @@ House::House() {}
 House::~House() {}
 
 // Setters
+void House::setId(string id) {
+    this->id = id;
+}
+
 void House::setLocation(string location) {
     this->location = location;
 }
@@ -101,6 +128,10 @@ void House::setConsumptionPts(int points) {
 }
 
 // Getters
+string House::getId() {
+    return this->id;
+}
+
 string House::getLocation() {
     return this->location;
 }
@@ -136,16 +167,16 @@ bool Guest::signUp() {
     // Get user input.
     string username, password, fullName, phone;
 
-    illog("Enter your username: ");
+    illogInfo("Enter your username: ");
     input(username);
 
-    illog("Enter your password: ");
+    illogInfo("Enter your password: ");
     input(password);
 
-    illog("Enter your full name: ");
+    illogInfo("Enter your full name: ");
     inputStr(fullName);
 
-    illog("Enter your phone number: ");
+    illogInfo("Enter your phone number: ");
     input(phone);
 
     // Set member data.
@@ -163,10 +194,10 @@ bool Guest::login() {
     // Get user input.
     string username, password;
 
-    illog("Enter your username: ");
+    illogInfo("Enter your username: ");
     input(username);
 
-    illog("Enter your password: ");
+    illogInfo("Enter your password: ");
     input(password);
 
     // Login the member through the System.
@@ -174,8 +205,8 @@ bool Guest::login() {
 }
 
 void Guest::viewHouseDetail(House* house) {
-    log("Location: " + house->getLocation());
-    log("Description: " + house->getDescription());
+    logInfo("Location: " << Colors::GREEN << house->getLocation());
+    logInfo("Description: " << Colors::GREEN << house->getDescription());
 }
 
 //* Member class
@@ -186,14 +217,14 @@ Member::Member() {}
 Member::~Member() {}
 
 bool Member::signUp() {
-    log("You are already logged in.");
-    log("Operation failed.");
+    logError("You are already logged in.");
+    logError("Operation failed.");
     return false;
 }
 
 bool Member::login() {
-    log("You are already logged in.");
-    log("Operation failed.");
+    logError("You are already logged in.");
+    logError("Operation failed.");
     return false;
 }
 
@@ -252,11 +283,11 @@ House* Member::getHouse() {
 }
 
 void Member::viewHouseDetail(House* house) {
-    log("Location: " + house->getLocation());
-    log("Description: " + house->getDescription());
-    log("Listing start: " + house->getListingStart());
-    log("Listing end: " + house->getListingEnd());
-    log("Consumption points: " + std::to_string(house->getConsumptionPts()));
+    logInfo("Location: " << Colors::GREEN << house->getLocation());
+    logInfo("Description: " << Colors::GREEN << house->getDescription());
+    logInfo("Listing start: " << Colors::GREEN << house->getListingStart());
+    logInfo("Listing end: " << Colors::GREEN << house->getListingEnd());
+    logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
 }
 
 //* Rating class
@@ -267,6 +298,10 @@ Rating::Rating() {}
 Rating::~Rating() {}
 
 // Setters
+void Rating::setId(string id) {
+    this->id = id;
+}
+
 void Rating::setHouse(House* house) {
     this->house = house;
 }
@@ -280,6 +315,10 @@ void Rating::setContent(string content) {
 }
 
 // Getters
+string Rating::getId() {
+    return this->id;
+}
+
 House* Rating::getHouse() {
     return this->house;
 }
@@ -300,6 +339,10 @@ Request::Request() {}
 Request::~Request() {}
 
 // Setters
+void Request::setId(string id) {
+    this->id = id;
+}
+
 void Request::setHouse(House* house) {
     this->house = house;
 }
@@ -317,6 +360,10 @@ void Request::setStatus(int status) {
 }
 
 // Getters
+string Request::getId() {
+    return this->id;
+}
+
 House* Request::getHouse() {
     return this->house;
 }
@@ -341,6 +388,10 @@ Comment::Comment() {}
 Comment::~Comment() {}
 
 // Setters
+void Comment::setId(string id) {
+    this->id = id;
+}
+
 void Comment::setHouse(House* house) {
     this->house = house;
 }
@@ -354,6 +405,10 @@ void Comment::setContent(string content) {
 }
 
 // Getters
+string Comment::getId() {
+    return this->id;
+}
+
 House* Comment::getHouse() {
     return this->house;
 }
@@ -404,31 +459,19 @@ string System::generateId() {
 
 // Authentication methods
 bool System::signUp(Member member) {
-    skipLine();
+    Member* newMember = addMember(member);
 
-    // Check if username is already taken
-    for (int i = 0; i < members.size(); i++) {
-        if (members[i].getUsername() == member.getUsername()) {
-            log("Username already taken.");
-            log("Operation failed.");
-            return false;
-        }
+    if (newMember == nullptr) {
+        logError(newl << "Sign up failed.");
+        return false;
     }
 
-    // Generate member ID
-    string id = generateId();
-    member.setId(id);
-
-    // Add member to members vector
-    members.push_back(member);
-    Member* savedMember = &members.back();
-
     // Update current member
-    setCurrentMember(savedMember);
+    setCurrentMember(newMember);
     setIsLoggedIn(true);
 
     // Display success message
-    log("Sign up successful.");
+    logSuccess(newl << "Sign up successful.");
     return true;
 }
 
@@ -445,17 +488,17 @@ bool System::login(string username, string password) {
                 setIsLoggedIn(true);
 
                 // Display success message
-                log("Login successful.");
+                logSuccess("Login successful.");
                 return true;
             } else {
-                log("Incorrect password.");
+                logError("Incorrect password.");
                 return false;
             }
         }
     }
 
     // Display failure message
-    log("Username not found.");
+    logError("Username not found.");
     return false;
 }
 
@@ -465,8 +508,90 @@ bool System::logout() {
     setIsLoggedIn(false);
 
     // Display success message
-    log("Logout successful.");
+    logSuccess("Logout successful.");
     return true;
+}
+
+// User related methods
+void System::showHouses() {
+    if (houses.size() == 0) {
+        logInfo("There are no houses on our system.");
+        return;
+    }
+
+    // Display all houses
+    for (int i = 0; i < houses.size(); i++) {
+        logInfo(newl << "House " + std::to_string(i + 1) + ":" << newl);
+
+        logInfo("Location: " + houses[i].getLocation());
+        logInfo("Description: " + houses[i].getDescription());
+
+        if (isUserLoggedIn || isUserAdmin) {
+            logInfo("Listing start: " + houses[i].getListingStart());
+            logInfo("Listing end: " + houses[i].getListingEnd());
+            logInfo("Consumption points: " + std::to_string(houses[i].getConsumptionPts()));
+        }
+    }
+}
+
+// Resouce management methods
+Member* System::addMember(Member member) {
+    // Check if username is already taken
+    for (int i = 0; i < members.size(); i++) {
+        if (members[i].getUsername() == member.getUsername()) {
+            skipLine();
+            illogError("Username already taken.");
+            return nullptr;
+        }
+    }
+
+    // Generate member ID
+    string id = generateId();
+    member.setId(id);
+
+    // Add member to members vector
+    members.push_back(member);
+    return &members.back();
+}
+
+House* System::addHouse(House house) {
+    // Generate house ID
+    string id = generateId();
+    house.setId(id);
+
+    // Add house to houses vector
+    houses.push_back(house);
+    return &houses.back();
+}
+
+Rating* System::addRating(Rating rating) {
+    // Generate rating ID
+    string id = generateId();
+    rating.setId(id);
+
+    // Add rating to ratings vector
+    ratings.push_back(rating);
+    return &ratings.back();
+}
+
+Comment* System::addComment(Comment comment) {
+    // Generate comment ID
+    string id = generateId();
+    comment.setId(id);
+
+    // Add comment to comments vector
+    comments.push_back(comment);
+    return &comments.back();
+}
+
+Request* System::addRequest(Request request) {
+    // Generate request ID
+    string id = generateId();
+    request.setId(id);
+
+    // Add request to requests vector
+    requests.push_back(request);
+    return &requests.back();
 }
 
 bool System::loadMembers() {
@@ -476,7 +601,7 @@ bool System::loadMembers() {
     file.open(filePath, std::ios::in);
 
     if (!file.is_open()) {
-        log("Warning: " << filePath + " not found.");
+        logError("Error: " << filePath + " not found.");
         return false;
     }
 
@@ -492,7 +617,7 @@ bool System::loadMembers() {
         }
 
         if (tokens.size() != 5) {
-            log("Invalid member format.");
+            logError("Invalid member format.");
             continue;
         }
 
@@ -508,6 +633,10 @@ bool System::loadMembers() {
     }
 
     file.close();
+
+    if (SHOW_PROCESSED_AMOUNT)
+        logInfo("Loaded " << members.size() << " members.");
+
     return true;
 }
 
@@ -518,7 +647,7 @@ bool System::loadHouses() {
     file.open(filePath, std::ios::in);
 
     if (!file.is_open()) {
-        log("Warning: " << filePath + " not found.");
+        logError("Error: " << filePath + " not found.");
         return false;
     }
 
@@ -534,7 +663,7 @@ bool System::loadHouses() {
         }
 
         if (tokens.size() != 6) {
-            log("Invalid house format.");
+            logError("Invalid house format.");
             continue;
         }
 
@@ -550,6 +679,10 @@ bool System::loadHouses() {
     }
 
     file.close();
+
+    if (SHOW_PROCESSED_AMOUNT)
+        logInfo("Loaded " << houses.size() << " houses.");
+
     return true;
 }
 
@@ -560,7 +693,7 @@ bool System::loadRatings() {
     file.open(filePath, std::ios::in);
 
     if (!file.is_open()) {
-        log("Warning: " << filePath + " not found.");
+        logError("Error: " << filePath + " not found.");
         return false;
     }
 
@@ -576,7 +709,7 @@ bool System::loadRatings() {
         }
 
         if (tokens.size() != 4) {
-            log("Invalid rating format.");
+            logError("Invalid rating format.");
             continue;
         }
 
@@ -590,6 +723,10 @@ bool System::loadRatings() {
     }
 
     file.close();
+
+    if (SHOW_PROCESSED_AMOUNT)
+        logInfo("Loaded " << ratings.size() << " ratings.");
+
     return true;
 }
 
@@ -600,7 +737,7 @@ bool System::loadComments() {
     file.open(filePath, std::ios::in);
 
     if (!file.is_open()) {
-        log("Warning: " << filePath + " not found.");
+        logError("Error: " << filePath + " not found.");
         return false;
     }
 
@@ -616,7 +753,7 @@ bool System::loadComments() {
         }
 
         if (tokens.size() != 4) {
-            log("Invalid comment format.");
+            logError("Invalid comment format.");
             continue;
         }
 
@@ -630,6 +767,10 @@ bool System::loadComments() {
     }
 
     file.close();
+
+    if (SHOW_PROCESSED_AMOUNT)
+        logInfo("Loaded " << comments.size() << " comments.");
+
     return true;
 }
 
@@ -640,7 +781,7 @@ bool System::loadRequests() {
     file.open(filePath, std::ios::in);
 
     if (!file.is_open()) {
-        log("Warning: " << filePath + " not found.");
+        logError("Error: " << filePath + " not found.");
         return false;
     }
 
@@ -656,7 +797,7 @@ bool System::loadRequests() {
         }
 
         if (tokens.size() != 3) {
-            log("Invalid request format.");
+            logError("Invalid request format.");
             continue;
         }
 
@@ -670,6 +811,10 @@ bool System::loadRequests() {
     }
 
     file.close();
+
+    if (SHOW_PROCESSED_AMOUNT)
+        logInfo("Loaded " << requests.size() << " requests.");
+
     return true;
 }
 
@@ -680,7 +825,7 @@ bool System::saveMembers() {
     file.open(filePath, std::ios::out);
 
     if (!file.is_open()) {
-        log("Warning: " << filePath + " not found.");
+        logError("Error: " << filePath + " not found.");
         return false;
     }
 
@@ -689,6 +834,10 @@ bool System::saveMembers() {
     }
 
     file.close();
+
+    if (SHOW_PROCESSED_AMOUNT)
+        logInfo("Saved " << members.size() << " members.");
+
     return true;
 }
 
@@ -699,7 +848,7 @@ bool System::saveHouses() {
     file.open(filePath, std::ios::out);
 
     if (!file.is_open()) {
-        log("Warning: " << filePath + " not found.");
+        logError("Error: " << filePath + " not found.");
         return false;
     }
 
@@ -708,6 +857,10 @@ bool System::saveHouses() {
     }
 
     file.close();
+
+    if (SHOW_PROCESSED_AMOUNT)
+        logInfo("Saved " << houses.size() << " houses.");
+
     return true;
 }
 
@@ -718,7 +871,7 @@ bool System::saveRatings() {
     file.open(filePath, std::ios::out);
 
     if (!file.is_open()) {
-        log("Warning: " << filePath + " not found.");
+        logError("Error: " << filePath + " not found.");
         return false;
     }
 
@@ -727,6 +880,10 @@ bool System::saveRatings() {
     }
 
     file.close();
+
+    if (SHOW_PROCESSED_AMOUNT)
+        logInfo("Saved " << ratings.size() << " ratings.");
+
     return true;
 }
 
@@ -737,7 +894,7 @@ bool System::saveComments() {
     file.open(filePath, std::ios::out);
 
     if (!file.is_open()) {
-        log("Warning: " << filePath + " not found.");
+        logError("Error: " << filePath + " not found.");
         return false;
     }
 
@@ -746,6 +903,10 @@ bool System::saveComments() {
     }
 
     file.close();
+
+    if (SHOW_PROCESSED_AMOUNT)
+        logInfo("Saved " << comments.size() << " comments.");
+
     return true;
 }
 
@@ -756,7 +917,7 @@ bool System::saveRequests() {
     file.open(filePath, std::ios::out);
 
     if (!file.is_open()) {
-        log("Warning: " << filePath + " not found.");
+        logError("Error: " << filePath + " not found.");
         return false;
     }
 
@@ -765,76 +926,88 @@ bool System::saveRequests() {
     }
 
     file.close();
+
+    if (SHOW_PROCESSED_AMOUNT)
+        logInfo("Saved " << requests.size() << " requests.");
+
     return true;
 }
 
 bool System::loadAll() {
     skipLine();
     log(DIVIDER);
+    skipLine();
 
-    log(newl << "SYSTEM NOTIFICATION: Loading data...");
+    logInfo("SYSTEM NOTIFICATION: Loading data..." << newl);
 
     if (!loadMembers()) {
-        log("SYSTEM NOTIFICATION: Failed to load members.");
+        logError("SYSTEM NOTIFICATION: Failed to load members.");
         return false;
     }
 
     if (!loadHouses()) {
-        log("SYSTEM NOTIFICATION: Failed to load houses.");
+        logError("SYSTEM NOTIFICATION: Failed to load houses.");
         return false;
     }
 
     if (!loadRatings()) {
-        log("SYSTEM NOTIFICATION: Failed to load ratings.");
+        logError("SYSTEM NOTIFICATION: Failed to load ratings.");
         return false;
     }
 
     if (!loadComments()) {
-        log("SYSTEM NOTIFICATION: Failed to load comments.");
+        logError("SYSTEM NOTIFICATION: Failed to load comments.");
         return false;
     }
 
     if (!loadRequests()) {
-        log("SYSTEM NOTIFICATION: Failed to load requests.");
+        logError("SYSTEM NOTIFICATION: Failed to load requests.");
         return false;
     }
 
-    log("SYSTEM NOTIFICATION: Data loaded." << newl);
+    if (SHOW_PROCESSED_AMOUNT)
+        skipLine();
+
+    logSuccess("SYSTEM NOTIFICATION: Data loaded." << newl);
     return true;
 }
 
 bool System::saveAll() {
     skipLine();
     log(DIVIDER);
+    skipLine();
 
-    log(newl << "SYSTEM NOTIFICATION: Saving data...");
+    logInfo("SYSTEM NOTIFICATION: Saving data..." << newl);
 
     if (!saveMembers()) {
-        log("SYSTEM NOTIFICATION: Failed to save members.");
+        logError("SYSTEM NOTIFICATION: Failed to save members.");
         return false;
     }
 
     if (!saveHouses()) {
-        log("SYSTEM NOTIFICATION: Failed to save houses.");
+        logError("SYSTEM NOTIFICATION: Failed to save houses.");
         return false;
     }
 
     if (!saveRatings()) {
-        log("SYSTEM NOTIFICATION: Failed to save ratings.");
+        logError("SYSTEM NOTIFICATION: Failed to save ratings.");
         return false;
     }
 
     if (!saveComments()) {
-        log("SYSTEM NOTIFICATION: Failed to save comments.");
+        logError("SYSTEM NOTIFICATION: Failed to save comments.");
         return false;
     }
 
     if (!saveRequests()) {
-        log("SYSTEM NOTIFICATION: Failed to save requests.");
+        logError("SYSTEM NOTIFICATION: Failed to save requests.");
         return false;
     }
 
-    log("SYSTEM NOTIFICATION: Data saved." << newl);
+    if (SHOW_PROCESSED_AMOUNT)
+        skipLine();
+
+    logSuccess("SYSTEM NOTIFICATION: Data saved." << newl);
     return true;
 }
 
@@ -849,5 +1022,41 @@ bool System::isLoggedIn() {
 
 bool System::isAdmin() {
     return isUserAdmin;
+}
+
+void System::showUserProfile() {
+    if (currentMember == nullptr) {
+        logError("You are not logged in.");
+        return;
+    }
+
+    log(Colors::BLUE << Colors::BOLD
+                     << "\t\tUser Profile"
+                     << Colors::RESET << newl);
+
+    logInfo("ID: " << Colors::GREEN << currentMember->getId());
+    logInfo("Username: " << Colors::GREEN << currentMember->getUsername());
+    logInfo("Full name: " << Colors::GREEN << currentMember->getFullName());
+    logInfo("Phone: " << Colors::GREEN << currentMember->getPhone());
+}
+
+void System::showUserHouseDetails() {
+    if (currentMember == nullptr) {
+        logError("You are not logged in.");
+        return;
+    }
+
+    House* house = currentMember->getHouse();
+
+    if (house == nullptr) {
+        logInfo("You don't have any house on the system.");
+        return;
+    }
+
+    logInfo("Location: " << Colors::GREEN << house->getLocation());
+    logInfo("Description: " << Colors::GREEN << house->getDescription());
+    logInfo("Listing start: " << Colors::GREEN << house->getListingStart());
+    logInfo("Listing end: " << Colors::GREEN << house->getListingEnd());
+    logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
 }
 }  // namespace HouseExchanger

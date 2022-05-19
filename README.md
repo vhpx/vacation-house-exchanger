@@ -2,12 +2,8 @@
 
 ## Setup
 
-Please run the following commands to compile the project:
+Please run the following commands to compile and run the project:
 
 ```bash
-g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp -o program.exe
-```
-
-```bash
-./program.exe
+g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp ./libs/colors.cpp -o program.exe ; .\program.exe
 ```
