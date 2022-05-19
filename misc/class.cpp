@@ -25,43 +25,78 @@ class Request;
 class Rating;
 class Comment;
 
-class Request {
+class Guest {
     private:
-        string id = "";
-        int status = 0;
-        Member *author = NULL;
+        void mem_register(){}
+        void login(){}
 
     public:
-        Request(){}  // Default constructor
-        int getStatus() { return this->status; };
-        void setStatus(int status) { this->status = status; };
-        Member& getAuthor() { return *author; }
+        virtual void viewHouseDetail(House *house){}
 
 };
 
-class Rating {
+class Member {
     private:
-        string id = "";
-        double value = 0;
-        Member *author = NULL;
-    public:
-        Rating(){}  // Default constructor
-        int getScore() { return this->value; };
-        Member& getAuthor() { return *author; }
-    
-    friend class House;
-};
+    // Member private information
+        string username;    string password;
+        string fullName;
+        string phone;
 
-class Comment {
-    private:
-        string id = "";
-        string content = "";
-        Member *author = NULL;
+        int creditPoint = 500;  // Default credit point
+
+    // Owned house information
+        House *house;
+
+    // Occupier
+        vector<Rating*> houseRatingScores;
 
     public:
-        Comment(){}  // Default constructor
-        string getContent() { return this->content; };
-        Member& getAuthor() { return *author; }
+    // Constructors
+        Member(){}  // Default
+        Member(string username, string password, string fullName, string phone) {  // Member without a house
+            this->username = username;
+            this->password = password;
+            this->fullName = fullName;
+            this->phone = phone;
+        }
+        Member(string username, string password, string fullName, string phone, House *house) {  // Member with a house
+            this->username = username;
+            this->password = password;
+            this->fullName = fullName;
+            this->phone = phone;
+            this->house = house;
+        }
+
+    // Get private information
+        string getUsername() { return username; }
+        string getFullName() { return fullName; }
+        string getPhone() { return phone; }
+
+    // Get average occupier-rating score
+        double getRatingScore() {
+            double sum = 0;
+            for (auto eachHouseRate : houseRatingScores) {
+                sum += eachHouseRate->value;
+            }
+            return sum / houseRatingScores.size();
+        }
+
+    // lease-related activities
+        void lease(Member *member){
+            if(1) {
+                
+
+            }
+        };
+
+        void resume(){};
+
+    // rental-related activities
+        void viewRentHouses(vector<House*> houses){}
+        void viewHouseDetails(House *house){}
+        void viewHouseReviews(House *house){}
+        void request(House *house){}
+
 };
 
 class House {
@@ -93,25 +128,17 @@ class House {
         // View house's lease details
         string getDateStart();
         string getDateEnd();
-        int getConsumingPointsPerDev();
+        int getConsumingPointsPerDay();
 
         // Add request, rating, or comment
-        void addRequest(Request *request) {
-            requests.push_back(request);
-        }
-
-        void addRating(Rating *rating) {
-            houseRatingScores.push_back(rating);
-        }
-
-        void addComment(Comment *comment) {
-            comments.push_back(comment);
-        }
+        void addRequest(Request *request) { requests.push_back(request); }
+        void addRating(Rating *rating) { houseRatingScores.push_back(rating); }
+        void addComment(Comment *comment) { comments.push_back(comment); }
 
         // View all house's rental request
         void viewAllRequests() {
             for (int count = 0; count < requests.size(); count++) {
-                log("Occupier: " << requests[count]->getAuthor());
+                requests[count]->viewRequest();
             }
         }
 
@@ -122,11 +149,11 @@ class House {
 
         // Display details of the house
         void viewHouseDetails(House house) {
+            log("House's detail: ");
             log("Location: " << house.getLocation());
             log("Description: " << house.getDescription());
-            log("Date Start: " << house.getDateStart());
-            log("Date End: " << house.getDateEnd());
-            log("Consuming Points Per Dev: " << house.getConsumingPointsPerDev());
+            log("Dates available for rent: " << house.getDateStart() << " - " << house.getDateEnd());
+            log("Consuming points per day: " << house.getConsumingPointsPerDay());
         }
 
         // Get rating score of the house
@@ -137,4 +164,55 @@ class House {
             }
             return sum / houseRatingScores.size();
         }
+
+};
+
+class Request {
+    private:
+        string id = "";
+        int status = 0;
+        Member *requester = NULL;
+
+    public:
+        Request(){}  // Default constructor
+        int getStatus() { return status; };
+        void setStatus(int status) { status = status; };
+        Member& getAuthor() { return *requester; }
+        void viewRequest() { 
+            log("Requester's information: ");
+            log("Username: " << requester->getUsername());
+            log("Full name: " << requester->getFullName());
+            log("Phone number: " << requester->getPhone());
+            log("Occupier-RatingScore: " << requester->getRatingScore());
+            // Lacking of user's availabilty!
+        }
+
+};
+
+class Rating {
+    private:
+        string id = "";
+        double value = 0;
+        Member *author = NULL;
+    public:
+        Rating(){}  // Default constructor
+        int getScore() { return this->value; }
+        Member& getAuthor() { return *author; }
+    
+    friend class Member;
+    friend class House;
+
+};
+
+class Comment {
+    private:
+        string id = "";
+        string content = "";
+        Member *author = NULL;
+
+    public:
+        Comment(){}  // Default constructor
+        string getContent() { return content; }
+        Member& getAuthor() { return *author; }
+
 };
