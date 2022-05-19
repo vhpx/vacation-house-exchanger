@@ -82,7 +82,7 @@ void displayMenu() {
     bool isAdmin = system->isAdmin();
 
     log(DIVIDER);
-    logInfo(Colors::BOLD << APP_NAME << newl);
+    logInfo(Colors::BOLD << "  " << APP_NAME);
 
     if (isLoggedIn || isAdmin) {
         log(DIVIDER);
@@ -107,7 +107,7 @@ void displayMenu() {
         logInfo("3. " << Colors::CYAN << "Browse houses");
     }
 
-    logError(newl << "-1. Exit program");
+    logInfo(newl << "0. " << Colors::RED << "Exit program");
     log(DIVIDER << newl);
 }
 }  // namespace HouseExchanger

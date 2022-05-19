@@ -8,6 +8,18 @@
 
 #include "colors.h"
 
+//* Constants
+// Preferences
+#define SHOW_PROCESSED_AMOUNT false  // Log out the amount of loaded / saved data
+
+// Data
+const string DATA_PATH = "data/";
+
+const string MEMBERS_FILE = "members.dat";
+const string HOUSES_FILE = "houses.dat";
+const string RATINGS_FILE = "ratings.dat";
+const string COMMENTS_FILE = "comments.dat";
+
 //* Helper preprocessor macros
 // I/O macros
 #define newl "\n"  // skip 1 line
@@ -40,17 +52,6 @@
 using std::string;
 using std::vector;
 
-//* Constants
-// Preferences
-#define SHOW_PROCESSED_AMOUNT false  // Log out the amount of loaded / saved data
-
-// Data
-const string DATA_PATH = "data/";
-
-const string MEMBERS_FILE = "members.dat";
-const string HOUSES_FILE = "houses.dat";
-const string RATINGS_FILE = "ratings.dat";
-const string COMMENTS_FILE = "comments.dat";
 const string REQUESTS_FILE = "requests.dat";
 
 string getFilePath(const string& fileName) {
@@ -812,7 +813,7 @@ bool System::loadRequests() {
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
-        logInfo("Loaded " << requests.size() << " requests." << newl);
+        logInfo("Loaded " << requests.size() << " requests.");
 
     return true;
 }
@@ -964,7 +965,7 @@ bool System::loadAll() {
         return false;
     }
 
-    logSuccess("SYSTEM NOTIFICATION: Data loaded." << newl);
+    logSuccess(newl << "SYSTEM NOTIFICATION: Data loaded." << newl);
     return true;
 }
 
@@ -973,7 +974,7 @@ bool System::saveAll() {
     log(DIVIDER);
     skipLine();
 
-    logInfo("SYSTEM NOTIFICATION: Saving data...");
+    logInfo("SYSTEM NOTIFICATION: Saving data..." << newl);
 
     if (!saveMembers()) {
         logError("SYSTEM NOTIFICATION: Failed to save members.");
@@ -1000,7 +1001,7 @@ bool System::saveAll() {
         return false;
     }
 
-    logSuccess("SYSTEM NOTIFICATION: Data saved." << newl);
+    logSuccess(newl << "SYSTEM NOTIFICATION: Data saved." << newl);
     return true;
 }
 
@@ -1022,6 +1023,10 @@ void System::showUserProfile() {
         logError("You are not logged in.");
         return;
     }
+
+    log(Colors::BLUE << Colors::BOLD
+                     << "\t\tUser Profile"
+                     << Colors::RESET << newl);
 
     logInfo("ID: " << Colors::GREEN << currentMember->getId());
     logInfo("Username: " << Colors::GREEN << currentMember->getUsername());

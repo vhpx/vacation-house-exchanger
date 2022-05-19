@@ -112,18 +112,18 @@ int main() {
                     member->logout();
                     break;
 
-                case -1:
+                case 0:
                     // Exit program
                     break;
 
                 default:
                     logError("Error: Invalid choice!");
-                    choice = 0;
+                    choice = -1;
                     break;
             }
 
             // Exit the loop the user wishes to quit the program.
-            if (choice == -1)
+            if (choice == 0)
                 break;
         } else {
             //* User is not logged in.
@@ -142,18 +142,18 @@ int main() {
                     system->showHouses();
                     break;
 
-                case -1:
+                case 0:
                     // Exit program
                     break;
 
                 default:
                     logError("Error: Invalid choice!");
-                    choice = 0;
+                    choice = -1;
                     break;
             }
 
             // Exit the loop the user wishes to quit the program.
-            if (choice == -1)
+            if (choice == 0)
                 break;
         }
 
