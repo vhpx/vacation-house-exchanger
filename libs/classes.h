@@ -312,6 +312,8 @@ class System {
     bool isLoggedIn();
     bool isAdmin();
 
+    bool isLocationAvailable(string location);
+    void displayAvailableLocations();
     void showUserProfile();
     void showUserHouseDetails();
 };

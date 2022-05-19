@@ -40,7 +40,6 @@ const string COMMENTS_FILE = "comments.dat";
 // Input string with/without spaces
 #define inputStr(x)            \
     illog(Colors::CYAN);       \
-    std::cin.ignore();         \
     std::getline(std::cin, x); \
     illog(Colors::RESET)
 
@@ -183,6 +182,8 @@ bool Guest::signUp() {
     input(password);
 
     illogInfo("Enter your full name: ");
+
+    std::cin.ignore();
     inputStr(fullName);
 
     illogInfo("Enter your phone number: ");
@@ -276,6 +277,8 @@ bool Member::updateProfile() {
     string fullName, phone;
 
     illogInfo("Enter your new full name: ");
+
+    std::cin.ignore();
     inputStr(fullName);
 
     illogInfo("Enter your new phone number: ");
@@ -376,18 +379,38 @@ House* Member::getHouse() {
 void Member::setupHouse() {
     // Get user input.
     string location, description, listingStart, listingEnd;
+    int consumptionPts;
 
-    illogInfo("Enter the location of the house: ");
-    input(location);
+    System* system = System::getInstance();
+    system->displayAvailableLocations();
 
-    illogInfo("Enter the description of the house: ");
-    input(description);
+    illogInfo("House location: ");
 
-    illogInfo("Enter the listing start date: ");
+    std::cin.ignore();
+    inputStr(location);
+
+    // Check if the location is available.
+    if (!system->isLocationAvailable(location)) {
+        skipLine();
+        logError("Location is not available.");
+
+        skipLine();
+        std::system("PAUSE");  // Only works on Windows.
+
+        return;
+    }
+
+    illogInfo("House description: ");
+    inputStr(description);
+
+    illogInfo("Listing start date (dd/mm/yyyy): ");
     input(listingStart);
 
-    illogInfo("Enter the listing end date: ");
+    illogInfo("Listing end date (dd/mm/yyyy): ");
     input(listingEnd);
+
+    illogInfo("Consumption points: ");
+    input(consumptionPts);
 
     // Create a new house object to store the data.
     House house;
@@ -398,6 +421,7 @@ void Member::setupHouse() {
     house.setDescription(description);
     house.setListingStart(listingStart);
     house.setListingEnd(listingEnd);
+    house.setConsumptionPts(consumptionPts);
 
     // Add the house to the system.
     House* savedHouse = System::getInstance()->addHouse(house);
@@ -592,7 +616,7 @@ string System::generateId() {
 }
 
 void System::notify(string message, string color = Colors::YELLOW) {
-    logInfo(Colors::CYAN << Colors::BOLD << "SYSTEM" << Colors::RESET << " - " << color << message);
+    logInfo(Colors::CYAN << Colors::BOLD << "SYSTEM" << Colors::RESET << " - " << color << message << Colors::RESET);
 }
 
 // Authentication methods
@@ -1294,6 +1318,15 @@ void System::showUserHouseDetails() {
         if (response == "N" || response == "n")
             return;
 
+        if (response != "Y" && response != "y") {
+            skipLine();
+            logError("Invalid response.");
+            skipLine();
+
+            std::system("PAUSE");  // Only works on Windows.
+            return;
+        }
+
         skipLine();
         currentMember->setupHouse();
         return;
@@ -1353,5 +1386,25 @@ Request* System::getRequest(string id) {
     }
 
     return nullptr;
+}
+
+void System::displayAvailableLocations() {
+    log(Colors::BLUE << Colors::BOLD
+                     << "Available Locations:"
+                     << Colors::RESET << newl);
+
+    for (string location : availableLocations)
+        logInfo("- " << Colors::CYAN << location);
+
+    skipLine();
+}
+
+bool System::isLocationAvailable(string location) {
+    for (string loc : availableLocations) {
+        if (loc.compare(location) == 0)
+            return true;
+    }
+
+    return false;
 }
 }  // namespace HouseExchanger
