@@ -41,6 +41,7 @@ class House {
     ~House();
 
     // Setters
+    void setId(string id);
     void setLocation(string location);
     void setDescription(string description);
 
@@ -50,6 +51,7 @@ class House {
     void setConsumptionPts(int points);
 
     // Getters
+    string getId();
     string getLocation();
     string getDescription();
 
@@ -135,11 +137,13 @@ class Rating {
     ~Rating();
 
     // Setters
+    void setId(string id);
     void setHouse(House* house);
     void setAuthor(Member* author);
     void setContent(string content);
 
     // Getters
+    string getId();
     House* getHouse();
     Member* getAuthor();
     string getContent();
@@ -161,12 +165,14 @@ class Request {
     ~Request();
 
     // Setters
+    void setId(string id);
     void setHouse(House* house);
     void setRequester(Member* requester);
     void setContent(string content);
     void setStatus(int status);
 
     // Getters
+    string getId();
     House* getHouse();
     Member* getRequester();
     string getContent();
@@ -188,11 +194,13 @@ class Comment {
     ~Comment();
 
     // Setters
+    void setId(string id);
     void setHouse(House* house);
     void setAuthor(Member* author);
     void setContent(string content);
 
     // Getters
+    string getId();
     House* getHouse();
     Member* getAuthor();
     string getContent();
@@ -241,6 +249,15 @@ class System {
     // Utility methods
     string generateId();
 
+    // Resouce management methods
+    void showHouses();
+
+    Member* addMember(Member member);
+    House* addHouse(House house);
+    Rating* addRating(Rating rating);
+    Comment* addComment(Comment comment);
+    Request* addRequest(Request request);
+
     // Loading methods
     bool loadMembers();
     bool loadHouses();
@@ -263,6 +280,9 @@ class System {
     Member* getCurrentMember();
     bool isLoggedIn();
     bool isAdmin();
+
+    void showUserProfile();
+    void showUserHouseDetails();
 };
 }  // namespace HouseExchanger
 

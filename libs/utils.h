@@ -1,4 +1,7 @@
+#include <string>
+
 namespace HouseExchanger {
+bool checkIfInteger(const std::string& str);
 void displayWelcomeMsg();
-void displayMenu(bool isLoggedIn);
-}
+void displayMenu();
+}  // namespace HouseExchanger

@@ -1,23 +1,45 @@
 #include <iostream>
 
 #include "./libs/classes.h"
+#include "./libs/colors.h"
 #include "./libs/utils.h"
+
+using namespace HouseExchanger;
 
 //* Helper preprocessor macros
 // I/O macros
 #define newl "\n"  // skip 1 line
-
-#define illog(x) std::cout << x        // In-line print
-#define skipLine() illog(newl)         // Skip 1 line in I/O
-#define log(x) std::cout << x << newl  // Print with newline
-#define input(x) std::cin >> x         // Print with newline
-
 #define DIVIDER "---------------------------------------"
 
-using namespace HouseExchanger;
+#define illog(x) std::cout << x  // In-line print (DEFAULT)
+#define skipLine() illog(newl)   // Skip 1 line in terminal
+
+#define illogInfo(x) std::cout << Colors::YELLOW << x << Colors::RESET    // In-line print (YELLOW)
+#define illogError(x) std::cout << Colors::RED << x << Colors::RESET      // In-line print (RED)
+#define illogSuccess(x) std::cout << Colors::GREEN << x << Colors::RESET  // In-line print (GREEN)
+
+#define log(x) illog(x << newl)                // Print with newline (DEFAULT)
+#define logInfo(x) illogInfo(x << newl)        // Print with newline (YELLOW)
+#define logError(x) illogError(x << newl)      // Print with newline (RED)
+#define logSuccess(x) illogSuccess(x << newl)  // Print with newline (GREEN)
+
+// Input string with/without spaces
+#define inputStr(x)            \
+    std::cin.ignore();         \
+    std::getline(std::cin, x); \
+    illog(Colors::RESET)
+
+// Input string with spaces or any other types
+#define input(x)         \
+    illog(Colors::CYAN); \
+    std::cin >> x;       \
+    illog(Colors::RESET)
 
 int main() {
     //* Setup
+    // Clear screen
+    std::system("cls");
+
     // Create a new system object to manage all the data
     System *system = System::getInstance();
 
@@ -42,11 +64,28 @@ int main() {
         bool isLoggedIn = system->isLoggedIn();
 
         // Display menu.
-        displayMenu(isLoggedIn);
+        displayMenu();
 
         // Get user choice.
-        illog("Enter your choice: ");
-        input(choice);
+        illogInfo("Enter your choice: ");
+
+        std::string buffer;
+        input(buffer);
+
+        // Check if the user entered an integer.
+        if (checkIfInteger(buffer)) {
+            choice = std::stoi(buffer);
+        } else {
+            logError("Error: Invalid input. Please enter an integer.");
+
+            // Wait for user to press enter.
+            skipLine();
+            std::system("PAUSE");  // Only works on Windows.
+
+            // Clear screen
+            std::system("cls");
+            continue;
+        }
 
         skipLine();
         log(DIVIDER);
@@ -58,15 +97,15 @@ int main() {
 
             switch (choice) {
                 case 1:
-                    log("Feature not yet implemented.");
+                    system->showUserProfile();
                     break;
 
                 case 2:
-                    log("Feature not yet implemented.");
+                    system->showUserHouseDetails();
                     break;
 
                 case 3:
-                    log("Feature not yet implemented.");
+                    system->showHouses();
                     break;
 
                 case 4:
@@ -78,7 +117,7 @@ int main() {
                     break;
 
                 default:
-                    log("Invalid choice!");
+                    logError("Error: Invalid choice!");
                     choice = 0;
                     break;
             }
@@ -100,8 +139,7 @@ int main() {
                     break;
 
                 case 3:
-                    // Browse houses
-                    log("Feature not yet implemented.");
+                    system->showHouses();
                     break;
 
                 case -1:
@@ -109,7 +147,7 @@ int main() {
                     break;
 
                 default:
-                    log("Invalid choice!");
+                    logError("Error: Invalid choice!");
                     choice = 0;
                     break;
             }
@@ -128,7 +166,7 @@ int main() {
     }
 
     skipLine();
-    log("SYSTEM NOTIFICATION: Exiting...");
+    logInfo("SYSTEM NOTIFICATION: Exiting...");
 
     // Save all the data after the user exits the system.
     bool saveSuccess = system->saveAll();
