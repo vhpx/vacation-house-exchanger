@@ -26,9 +26,7 @@ class System;
 
 class Rating {
    private:
-    
-
-   public:
+      public:
     // constructors
     double value;
     Rating(int value);
@@ -39,7 +37,7 @@ class Comment {
    private:
     string content;
 
-    // House *house;
+    House *house;
 
    public:
     // constructors
@@ -51,7 +49,7 @@ class Request {
    private:
     int status;
 
-    // House *house;
+    House *house;
 
    public:
     // constructors
@@ -60,31 +58,6 @@ class Request {
 
     void viewRequest();
     void setStatus(int status);
-};
-
-class Guest {
-   private:
-    void mem_register() {
-    }
-
-   public:
-    virtual void viewHouseDetail(House *house) {
-    }
-};
-
-class Member : public Guest {
-   private:
-    string username;
-    string password;
-    string fullName;
-    string phone;
-
-    int creditPoint = 500;
-
-    House *house;
-
-   public:
-    // constructors
 };
 
 class House {
@@ -160,20 +133,4 @@ class House {
         }
         return sum / houseRatingScores.size();
     }
-};
-
-class System {
-   private:
-    string ad_username;
-    string ad_password;
-
-    vector<Member> members;
-    vector<House> houses;
-
-   public:
-    void saveMembers();
-    void saveHouses();
-
-    void viewMembers();
-    void viewHouses();
 };
