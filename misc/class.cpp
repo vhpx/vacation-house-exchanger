@@ -30,8 +30,13 @@ class Rating {
     string id;
     Member *author;;
    public:
-    // constructors
-    Rating(double value, string id, Member *author);
+    // Default constructor
+    Rating() {
+        value = 0;
+        id = "";
+        author = NULL;
+    }
+
     int getScore();
 };
 
@@ -42,8 +47,12 @@ class Comment {
     House *house;
 
    public:
-    // constructors
-    Comment(string content);
+    // Default constructor
+    Comment() {
+        content = "";
+        house = NULL;
+    }
+
     string getContent();
 };
 
@@ -54,8 +63,12 @@ class Request {
     House *house;
 
    public:
-    // constructors
-    Request(int status);
+    // Default constructor
+    Request() {
+        status = 0;
+        house = NULL;
+    }
+
     int getStatus();
 
     void viewRequest();
@@ -82,8 +95,15 @@ class House {
     int consumingPointsPerDev;
 
    public:
-    // constructors
-    House(string location, string description, string dateStart, string dateEnd, int consumingPointsPerDev, vector<Member> members, vector<Rating> ratings);
+    // Default constructor
+    House() {
+        location = "";
+        description = "";
+        owner = NULL;
+        dateStart = "";
+        dateEnd = "";
+        consumingPointsPerDev = 0;
+    }
 
     // House lease details
     string getDateStart();
