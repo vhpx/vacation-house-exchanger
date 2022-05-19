@@ -52,6 +52,11 @@ void displayMenu(bool isLoggedIn) {
     if (isLoggedIn) {
         log("1. Search for a member");
         log("2. View account details");
+        log("2. List your house");
+        log("2. View account details");
+        log("3. Browse houses");
+        log("2. Request a house");
+        log("2. View all requests");
         log("3. Logout");
         log("4. Exit program");
     } else {
