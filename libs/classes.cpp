@@ -426,7 +426,9 @@ string Comment::getContent() {
 System::System() {}
 
 // Destructor
-System::~System() {}
+System::~System() {
+    delete this->instancePtr;
+}
 
 // Singleton instance
 System* System::instancePtr = nullptr;
@@ -933,7 +935,7 @@ bool System::saveRequests() {
     return true;
 }
 
-bool System::loadAll() {
+bool System::initialize() {
     skipLine();
     log(DIVIDER);
     skipLine();
@@ -972,7 +974,7 @@ bool System::loadAll() {
     return true;
 }
 
-bool System::saveAll() {
+bool System::shutdown() {
     skipLine();
     log(DIVIDER);
     skipLine();

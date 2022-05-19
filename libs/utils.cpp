@@ -72,10 +72,15 @@ void displayWelcomeMsg() {
     logInfo(AUTHOR3_INFO);
     logInfo(AUTHOR4_INFO);
 
+    // Wait for user to press enter.
     skipLine();
+    std::system("PAUSE");  // Only works on Windows.
+
+    // Clear screen
+    std::system("cls");
 }
 
-void displayMenu() {
+void displayDefaultMenu() {
     System* system = System::getInstance();
 
     bool isLoggedIn = system->isLoggedIn();
