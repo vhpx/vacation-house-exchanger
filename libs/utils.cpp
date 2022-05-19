@@ -42,10 +42,10 @@ void displayWelcomeMsg() {
     log(AUTHOR4_INFO);
 
     skipLine();
-    illog(DIVIDER);
 }
 
 void displayMenu(bool isLoggedIn) {
+    illog(DIVIDER);
     skipLine();
     log("\tPlease select an option" << newl);
 
@@ -58,7 +58,9 @@ void displayMenu(bool isLoggedIn) {
         log("1. Sign up");
         log("2. Login");
         log("3. Browse houses");
-        log("4. Exit program" << newl);
+        log("4. Exit program");
     }
+
+    log(DIVIDER << newl);
 }
 }  // namespace HouseExchanger
