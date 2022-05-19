@@ -1,4 +1,4 @@
-#include "loop.h"
+#include "loops.h"
 
 #include <iostream>
 
@@ -104,7 +104,8 @@ void mainLoop() {
                     break;
             }
 
-            // Exit the loop the user wishes to quit the program.
+            // Exit the loop if the user
+            // wishes to quit the program.
             if (choice == 0)
                 break;
         } else {
@@ -134,7 +135,8 @@ void mainLoop() {
                     break;
             }
 
-            // Exit the loop the user wishes to quit the program.
+            // Exit the loop if the user
+            // wishes to quit the program.
             if (choice == 0)
                 break;
         }
