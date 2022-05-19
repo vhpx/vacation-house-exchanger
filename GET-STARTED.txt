@@ -1,5 +1,9 @@
-Please run the following commands to compile the project:
-> g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp -o program.exe
+> Please run the following commands to compile the project:
 
-After compiling, run the program with the following command:
-> ./program.exe
+g++ main.cpp ./libs/classes.cpp ./libs/utils.cpp -o program.exe
+
+---------------------------------------------------------------------
+
+> After compiling, run the program with the following command:
+
+./program.exe
