@@ -1,6 +1,7 @@
 #include "classes.h"
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <random>
 #include <sstream>
@@ -131,7 +132,8 @@ int Date::getYear() { return year; }
 // Other methods
 string Date::toString() {
     std::stringstream ss;
-    ss << day << "/" << month << "/" << year;
+    ss << std::setfill('0') << std::setw(2) << day << "/"
+       << std::setfill('0') << std::setw(2) << month << "/" << year;
     return ss.str();
 }
 
@@ -172,8 +174,79 @@ string Date::toDateString() {
     ss << day << (day % 10 == 1 ? "st" : day % 10 == 2 ? "nd"
                                      : day % 10 == 3   ? "rd"
                                                        : "th")
-       << " " << getMonthStr() << " " << year;
+       << " " << getMonthStr() << ", " << year;
     return ss.str();
+}
+
+bool Date::isValid(string date) {
+    // Check if the date is in the correct format
+    // (dd/mm/yyyy)
+    if (date.length() != 10)
+        return false;
+
+    if (!isdigit(date[0]) || !isdigit(date[1]) || date[2] != '/' ||
+        !isdigit(date[3]) || !isdigit(date[4]) || date[5] != '/' ||
+        !isdigit(date[6]) || !isdigit(date[7]) || !isdigit(date[8]) ||
+        !isdigit(date[9]))
+        return false;
+
+    // Check if the date is valid
+    int day = std::stoi(date.substr(0, 2));
+    int month = std::stoi(date.substr(3, 2));
+    int year = std::stoi(date.substr(6, 4));
+
+    if (day < 1 || day > 31)
+        return false;
+
+    if (month < 1 || month > 12)
+        return false;
+
+    if (year < 0)
+        return false;
+
+    if (month == 2) {
+        if (year % 4 == 0) {
+            if (day > 29)
+                return false;
+        } else {
+            if (day > 28)
+                return false;
+        }
+    } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+        if (day > 30)
+            return false;
+    }
+
+    return true;
+}
+
+Date Date::parse(string date) {
+    Date d;
+    d.setDay(std::stoi(date.substr(0, 2)));
+    d.setMonth(std::stoi(date.substr(3, 2)));
+    d.setYear(std::stoi(date.substr(6, 4)));
+    return d;
+}
+
+int Date::compare(Date date1, Date date2) {
+    if (date1.getYear() < date2.getYear())
+        return -1;
+    else if (date1.getYear() > date2.getYear())
+        return 1;
+    else {
+        if (date1.getMonth() < date2.getMonth())
+            return -1;
+        else if (date1.getMonth() > date2.getMonth())
+            return 1;
+        else {
+            if (date1.getDay() < date2.getDay())
+                return -1;
+            else if (date1.getDay() > date2.getDay())
+                return 1;
+            else
+                return 0;
+        }
+    }
 }
 
 //* House Class
@@ -200,11 +273,11 @@ void House::setDescription(string description) {
     this->description = description;
 }
 
-void House::setListingStart(string listingStart) {
+void House::setListingStart(Date listingStart) {
     this->listingStart = listingStart;
 }
 
-void House::setListingEnd(string listingEnd) {
+void House::setListingEnd(Date listingEnd) {
     this->listingEnd = listingEnd;
 }
 
@@ -229,11 +302,11 @@ string House::getDescription() {
     return this->description;
 }
 
-string House::getListingStart() {
+Date House::getListingStart() {
     return this->listingStart;
 }
 
-string House::getListingEnd() {
+Date House::getListingEnd() {
     return this->listingEnd;
 }
 
@@ -471,10 +544,13 @@ House* Member::getHouse() {
 }
 
 bool Member::listHouse() {
+    // Check if existing house.
+    bool isExistingHouse = this->getHouse() != nullptr;
+
     // Get user input.
-    string location, description, listingStart, listingEnd;
+    string location, description;
+    Date listingStart, listingEnd;
     int consumptionPts;
-    bool validPts = false;
 
     System* system = System::getInstance();
     system->displayAvailableLocations();
@@ -498,26 +574,38 @@ bool Member::listHouse() {
     illogInfo("House description: ");
     inputStr(description);
 
+    string buffer = "";
     illogInfo("Listing start date (dd/mm/yyyy): ");
-    input(listingStart);
+    input(buffer);
 
-    illogInfo("Listing end date (dd/mm/yyyy): ");
-    input(listingEnd);
-
-    while (!validPts) {
-        string buffer;
-        illogInfo("Consumption points: ");
+    while (!Date::isValid(buffer)) {
+        illogInfo("Invalid date format. Please try again: ");
         input(buffer);
-
-        if (checkIfInteger(buffer)) {
-            consumptionPts = std::stoi(buffer);
-            validPts = true;
-        } else {
-            skipLine();
-            logError("Invalid input.");
-            skipLine();
-        }
     }
+
+    listingStart = Date::parse(buffer);
+
+    buffer = "";
+    illogInfo("Listing end date (dd/mm/yyyy): ");
+    input(buffer);
+
+    while (!Date::isValid(buffer)) {
+        illogInfo("Invalid date format. Please try again: ");
+        input(buffer);
+    }
+
+    listingEnd = Date::parse(buffer);
+
+    buffer = "";
+    illogInfo("Consumption points: ");
+    input(buffer);
+
+    while (!checkIfInteger(buffer)) {
+        illogInfo("Invalid number format. Please try again: ");
+        input(buffer);
+    }
+
+    consumptionPts = std::stoi(buffer);
 
     // Create a new house object to store the data.
     House house;
@@ -531,8 +619,8 @@ bool Member::listHouse() {
     house.setConsumptionPts(consumptionPts);
 
     // Check for existing house ID.
-    string houseId = this->getHouse() != nullptr ? this->getHouse()->getId() : "";
-    if (!houseId.empty()) house.setId(houseId);
+    string houseId = isExistingHouse ? this->getHouse()->getId() : "";
+    if (isExistingHouse) house.setId(houseId);
 
     // Add the house to the system.
     House* savedHouse = System::getInstance()->addHouse(house, houseId);
@@ -554,8 +642,8 @@ bool Member::listHouse() {
 void Member::viewHouseDetail(House* house) {
     logInfo("Location: " << Colors::GREEN << house->getLocation());
     logInfo("Description: " << Colors::GREEN << house->getDescription());
-    logInfo("Listing start: " << Colors::GREEN << house->getListingStart());
-    logInfo("Listing end: " << Colors::GREEN << house->getListingEnd());
+    logInfo("Listing start: " << Colors::GREEN << house->getListingStart().toDateString());
+    logInfo("Listing end: " << Colors::GREEN << house->getListingEnd().toDateString());
     logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
 }
 
@@ -863,7 +951,26 @@ bool System::deleteProfile(string password) {
 }
 
 // User related methods
-void System::displayHouseBrowser(string location) {
+vector<House*> System::getAvailableHouses(string location, Date startingDate, Date endingDate) {
+    vector<House*> availableHouses;
+
+    for (int i = 0; i < houses.size(); i++) {
+        if (houses[i].getLocation().compare(location) != 0)
+            continue;
+
+        if (Date::compare(startingDate, houses[i].getListingStart()) < 0)
+            continue;
+
+        if (Date::compare(endingDate, houses[i].getListingEnd()) > 0)
+            continue;
+
+        availableHouses.push_back(&houses[i]);
+    }
+
+    return availableHouses;
+}
+
+void System::displayHouseBrowser(bool eligibleOnly, string location, Date startingDate, Date endingDate) {
     log(Colors::BLUE << Colors::BOLD << "\t     "
                      << "House Browser"
                      << Colors::RESET << newl);
@@ -875,37 +982,48 @@ void System::displayHouseBrowser(string location) {
     }
 
     // Display all houses
-    int count = 0;
 
-    for (int i = 0; i < houses.size(); i++) {
-        // Skip houses that are not in the specified location
-        if (!location.empty() && location.compare(houses[i].getLocation()) != 0)
-            continue;
+    if (eligibleOnly) {
+        vector<House*> availableHouses = getAvailableHouses(location, startingDate, endingDate);
 
-        count++;
+        if (availableHouses.size() == 0) {
+            skipLine();
+            logInfo("There are no available houses that match your status.");
+            return;
+        }
 
-        log(DIVIDER);
-        log(Colors::BLUE << Colors::BOLD
-                         << "\t\tHouse " + std::to_string(count)
-                         << Colors::RESET << newl);
+        for (int i = 0; i < availableHouses.size(); i++) {
+            log(DIVIDER);
+            log(Colors::BLUE << Colors::BOLD
+                             << "\t\tHouse " + std::to_string(i + 1)
+                             << Colors::RESET << newl);
 
-        logInfo("Location: " << Colors::GREEN << houses[i].getLocation());
-        logInfo("Description: " << Colors::GREEN << houses[i].getDescription());
+            logInfo("Location: " << Colors::GREEN << houses[i].getLocation());
+            logInfo("Description: " << Colors::GREEN << houses[i].getDescription());
 
-        if (isUserLoggedIn || isUserAdmin) {
-            logInfo("Listing start: " << Colors::GREEN << houses[i].getListingStart());
-            logInfo("Listing end: " << Colors::GREEN << houses[i].getListingEnd());
-            logInfo("Consumption points: " << Colors::GREEN << std::to_string(houses[i].getConsumptionPts()));
+            if (isUserLoggedIn || isUserAdmin) {
+                logInfo("Listing start: " << Colors::GREEN << houses[i].getListingStart().toDateString());
+                logInfo("Listing end: " << Colors::GREEN << houses[i].getListingEnd().toDateString());
+                logInfo("Consumption points: " << Colors::GREEN << std::to_string(houses[i].getConsumptionPts()));
+            }
+        }
+    } else {
+        for (int i = 0; i < houses.size(); i++) {
+            log(DIVIDER);
+            log(Colors::BLUE << Colors::BOLD
+                             << "\t\tHouse " + std::to_string(i + 1)
+                             << Colors::RESET << newl);
+
+            logInfo("Location: " << Colors::GREEN << houses[i].getLocation());
+            logInfo("Description: " << Colors::GREEN << houses[i].getDescription());
+
+            if (isUserLoggedIn || isUserAdmin) {
+                logInfo("Listing start: " << Colors::GREEN << houses[i].getListingStart().toDateString());
+                logInfo("Listing end: " << Colors::GREEN << houses[i].getListingEnd().toDateString());
+                logInfo("Consumption points: " << Colors::GREEN << std::to_string(houses[i].getConsumptionPts()));
+            }
         }
     }
-
-    if (count == 0) {
-        log(DIVIDER);
-        logInfo("There are no houses in " + location + ".");
-    }
-
-    skipLine();
-    std::system("pause");
 }
 
 // Resouce management methods
@@ -1079,8 +1197,8 @@ bool System::loadHouses() {
         house.setId(tokens[1]);
         house.setLocation(tokens[2]);
         house.setDescription(tokens[3]);
-        house.setListingStart(tokens[4]);
-        house.setListingEnd(tokens[5]);
+        house.setListingStart(Date::parse(tokens[4]));
+        house.setListingEnd(Date::parse(tokens[5]));
         house.setConsumptionPts(std::stoi(tokens[6]));
 
         houses.push_back(house);
@@ -1266,8 +1384,8 @@ bool System::saveHouses() {
     for (House house : houses) {
         file << house.getOwner()->getId() << ","
              << house.getId() << "," << house.getLocation() << ","
-             << house.getDescription() << "," << house.getListingStart() << ","
-             << house.getListingEnd() << "," << house.getConsumptionPts() << newl;
+             << house.getDescription() << "," << house.getListingStart().toString() << ","
+             << house.getListingEnd().toString() << "," << house.getConsumptionPts() << newl;
     }
 
     file.close();
@@ -1503,8 +1621,8 @@ void System::showUserHouseDetails() {
     logInfo("ID: " << Colors::GREEN << house->getId());
     logInfo("Location: " << Colors::GREEN << house->getLocation());
     logInfo("Description: " << Colors::GREEN << house->getDescription());
-    logInfo("Listing start: " << Colors::GREEN << house->getListingStart());
-    logInfo("Listing end: " << Colors::GREEN << house->getListingEnd());
+    logInfo("Listing start: " << Colors::GREEN << house->getListingStart().toDateString());
+    logInfo("Listing end: " << Colors::GREEN << house->getListingEnd().toDateString());
     logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
 }
 

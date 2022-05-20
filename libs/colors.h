@@ -1,3 +1,6 @@
+#ifndef COLORS_INCLUDED
+#define COLORS_INCLUDED
+
 #include <string>
 
 namespace Colors {
@@ -17,3 +20,5 @@ const std::string HIDDEN = "\033[8m";
 
 const std::string BLACK = "\033[30m";
 }  // namespace Colors
+
+#endif  // COLORS_INCLUDED

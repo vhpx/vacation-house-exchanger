@@ -148,8 +148,11 @@ void mainLoop() {
                 }
 
                 case 3:
-                    system->displayHouseBrowser();
-                    skipPause = true;
+                    system->displayHouseBrowser(false, "", Date(), Date());
+
+                    skipLine();
+                    log(DIVIDER);
+                    logInfo("To view the house details and book it, you need to login first.");
                     break;
 
                 case 0:
@@ -345,6 +348,82 @@ void houseDetailsLoop() {
     }
 }
 
+void houseSelectorLoop(bool eligibleOnly, string location, Date startingDate, Date endingDate) {
+    System *system = System::getInstance();
+    Member *currentUser = system->getCurrentMember();
+
+    int choice = -1;
+
+    // Execute house selector loop
+    while (choice != 0) {
+        // Clear screen
+        std::system("cls");
+
+        // Display all houses
+        system->displayHouseBrowser(eligibleOnly, location, startingDate, endingDate);
+
+        // Display the house selector menu
+        displayHouseSelectorMenu();
+
+        // Get user choice.
+        illogInfo("Enter your choice: ");
+
+        std::string buffer;
+        input(buffer);
+
+        // Check if the user entered an integer.
+        if (checkIfInteger(buffer)) {
+            choice = std::stoi(buffer);
+        } else {
+            logError("Error: Invalid input. Please enter an integer.");
+
+            // Wait for user to press enter.
+            skipLine();
+            std::system("PAUSE");  // Only works on Windows.
+
+            continue;
+        }
+
+        skipLine();
+        log(DIVIDER);
+
+        // Process user choice.
+        switch (choice) {
+            case 1: {
+                int houseNumber;
+
+                illogInfo("Enter the house number: ");
+                input(houseNumber);
+
+                break;
+            }
+
+            case 0:
+                // Exit house selector loop
+                break;
+
+            default:
+                logError("Error: Invalid choice!");
+                choice = -1;
+
+                skipLine();
+                std::system("PAUSE");  // Only works on Windows.
+                break;
+        }
+
+        // Exit the loop if the user
+        // wishes to quit the program.
+        if (choice == 0)
+            break;
+    }
+
+    // Wait for user to press enter.
+    if (choice != 0) {
+        skipLine();
+        std::system("PAUSE");  // Only works on Windows.
+    }
+}
+
 void houseBrowserLoop() {
     System *system = System::getInstance();
 
@@ -383,7 +462,7 @@ void houseBrowserLoop() {
         // Process user choice.
         switch (choice) {
             case 1:
-                system->displayHouseBrowser();
+                houseSelectorLoop(false, "", Date(), Date());
                 break;
 
             case 2: {
@@ -406,10 +485,33 @@ void houseBrowserLoop() {
                     break;
                 }
 
+                Date startingDate, endingDate;
+
+                string buffer;
+                illogInfo("Listing start date (dd/mm/yyyy): ");
+                input(buffer);
+
+                while (!Date::isValid(buffer)) {
+                    illogInfo("Invalid date format. Please try again: ");
+                    input(buffer);
+                }
+
+                startingDate = Date::parse(buffer);
+
+                illogInfo("Listing end date (dd/mm/yyyy): ");
+                input(buffer);
+
+                while (!Date::isValid(buffer)) {
+                    illogInfo("Invalid date format. Please try again: ");
+                    input(buffer);
+                }
+
+                endingDate = Date::parse(buffer);
+
                 skipLine();
                 log(DIVIDER);
 
-                system->displayHouseBrowser(location);
+                houseSelectorLoop(true, location, startingDate, endingDate);
                 break;
             }
 

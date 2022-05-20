@@ -52,23 +52,25 @@ class Date {
     void setYear(int year);
 
     //* Other methods
+    static bool isValid(string date);
+    static Date parse(string date);
+    static int compare(Date date1, Date date2);
+
     string toString();
     string getMonthStr();
     string toDateString();
-
-    void parseDate(string date);
 };
 
 class House {
    private:
     Member* owner = nullptr;
 
-    string id = "";
-    string location = "";
+    string id;
+    string location;
     string description = "";
 
-    string listingStart = "";
-    string listingEnd = "";
+    Date listingStart;
+    Date listingEnd;
 
     int consumptionPts = 0;  // points per day
     vector<Rating*> ratings;
@@ -86,8 +88,8 @@ class House {
     void setLocation(string location);
     void setDescription(string description);
 
-    void setListingStart(string listingStart);
-    void setListingEnd(string listingEnd);
+    void setListingStart(Date listingStart);
+    void setListingEnd(Date listingEnd);
 
     void setConsumptionPts(int points);
 
@@ -97,8 +99,8 @@ class House {
     string getLocation();
     string getDescription();
 
-    string getListingStart();
-    string getListingEnd();
+    Date getListingStart();
+    Date getListingEnd();
 
     int getConsumptionPts();
 
@@ -312,7 +314,8 @@ class System {
     void notify(string message, string color);
 
     // Resouce management methods
-    void displayHouseBrowser(string location = "");
+    vector<House*> getAvailableHouses(string location, Date startingDate, Date endingDate);
+    void displayHouseBrowser(bool eligibleOnly, string location, Date startingDate, Date endingDate);
 
     Member* addMember(Member member, string id = "");
     House* addHouse(House house, string id = "");

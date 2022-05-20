@@ -211,4 +211,20 @@ void displayHouseBrowserMenu() {
     logInfo(newl << Colors::BOLD << "[0] " << Colors::RED << "Back");
     log(DIVIDER << newl);
 }
+
+void displayHouseSelectorMenu() {
+    log(DIVIDER);
+    log(Colors::BLUE << Colors::BOLD
+                     << "\tPlease select an option"
+                     << Colors::RESET << newl);
+
+    std::vector<std::string> options = {
+        "Select house",
+    };
+
+    displayMenuOptions(options);
+
+    logInfo(newl << Colors::BOLD << "[0] " << Colors::RED << "Back");
+    log(DIVIDER << newl);
+}
 }  // namespace HouseExchanger

@@ -1,3 +1,6 @@
+#ifndef UTILS_INCLUDED
+#define UTILS_INCLUDED
+
 #include <string>
 #include <vector>
 
@@ -15,4 +18,7 @@ void displayDefaultMenu();
 void displayProfileMenu();
 void displayHouseDetailsMenu();
 void displayHouseBrowserMenu();
+void displayHouseSelectorMenu();
 }  // namespace HouseExchanger
+
+#endif  // UTILS_INCLUDED
