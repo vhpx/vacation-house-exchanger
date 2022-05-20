@@ -666,7 +666,11 @@ Member* System::signUp(Member member) {
     setIsLoggedIn(true);
 
     // Display success message
+    log(newl << Colors::CYAN << "Deducted " << Colors::YELLOW << "$500" << Colors::CYAN << " as a sign up fee.");
+
     logSuccess(newl << "Sign up successful.");
+    logSuccess("Awarded " << Colors::YELLOW << "500" << Colors::GREEN << " points for signing up.");
+
     return newMember;
 }
 

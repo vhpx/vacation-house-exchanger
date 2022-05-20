@@ -126,6 +126,7 @@ void mainLoop() {
 
                 case 2: {
                     Member *newMember = guest.signUp();
+                    if (newMember == nullptr) break;
 
                     string response;
 
