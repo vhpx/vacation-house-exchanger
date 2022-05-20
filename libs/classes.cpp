@@ -1383,7 +1383,7 @@ bool System::initialize() {
     if (SHOW_PROCESSED_AMOUNT)
         skipLine();
 
-    notify("Data loaded.\n", Colors::GREEN);
+    notify("Data loaded.\n");
 
     return true;
 }
@@ -1421,7 +1421,7 @@ bool System::shutdown() {
     if (SHOW_PROCESSED_AMOUNT)
         skipLine();
 
-    notify("Data saved.\n", Colors::GREEN);
+    notify("Data saved.\n");
 
     log(DIVIDER);
     skipLine();
