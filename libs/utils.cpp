@@ -202,8 +202,8 @@ void displayHouseBrowserMenu() {
                      << Colors::RESET << newl);
 
     std::vector<std::string> options = {
-        "Browse all houses",
-        "Search houses",
+        "Browse all houses in the system",
+        "Browse houses with filters",
     };
 
     displayMenuOptions(options);

@@ -941,6 +941,8 @@ House* System::addHouse(House house, string id) {
         for (int i = 0; i < houses.size(); i++) {
             if (houses[i].getId() == id) {
                 houses[i] = house;
+                houses[i].setId(id);
+
                 return &houses[i];
             }
         }
