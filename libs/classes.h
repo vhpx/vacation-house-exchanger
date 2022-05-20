@@ -22,6 +22,43 @@ class Rating;
 class Comment;
 class Request;
 
+class Date {
+   private:
+    int day;
+    int month;
+    int year;
+
+   public:
+    //* Default constructor
+    Date();
+
+    //* Destructor
+    ~Date();
+
+    //* Copy constructor
+    Date(const Date& other);
+
+    //* Assignment operator
+    Date& operator=(const Date& other);
+
+    //* Getters
+    int getDay();
+    int getMonth();
+    int getYear();
+
+    //* Setters
+    void setDay(int day);
+    void setMonth(int month);
+    void setYear(int year);
+
+    //* Other methods
+    string toString();
+    string getMonthStr();
+    string toDateString();
+
+    void parseDate(string date);
+};
+
 class House {
    private:
     Member* owner = nullptr;
@@ -275,7 +312,7 @@ class System {
     void notify(string message, string color);
 
     // Resouce management methods
-    void showHouses();
+    void displayHouseBrowser(string location = "");
 
     Member* addMember(Member member, string id = "");
     House* addHouse(House house, string id = "");

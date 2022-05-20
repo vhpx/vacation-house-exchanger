@@ -123,14 +123,16 @@ void displayDefaultMenu() {
             "Account profile",
             "House profile",
             "Browse houses",
-            "Logout"};
+            "Logout",
+        };
 
         displayMenuOptions(options);
     } else {
         std::vector<std::string> options = {
             "Login",
             "Register",
-            "Browse houses"};
+            "Browse houses",
+        };
 
         displayMenuOptions(options);
     }
@@ -155,7 +157,8 @@ void displayProfileMenu() {
     std::vector<std::string> options = {
         "Update profile",
         "Change password",
-        "Delete account"};
+        "Delete account",
+    };
 
     displayMenuOptions(options);
 
@@ -181,7 +184,27 @@ void displayHouseDetailsMenu() {
         "View requests",
         "View comments",
         "View ratings",
-        "Unlist house"};
+        "Unlist house",
+    };
+
+    displayMenuOptions(options);
+
+    logInfo(newl << Colors::BOLD << "[0] " << Colors::RED << "Back");
+    log(DIVIDER << newl);
+}
+
+void displayHouseBrowserMenu() {
+    displayAppHeader();
+
+    log(DIVIDER);
+    log(Colors::BLUE << Colors::BOLD
+                     << "\tPlease select an option"
+                     << Colors::RESET << newl);
+
+    std::vector<std::string> options = {
+        "Browse all houses",
+        "Search houses",
+    };
 
     displayMenuOptions(options);
 

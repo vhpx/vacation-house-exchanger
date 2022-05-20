@@ -26,7 +26,6 @@
 // Input string with/without spaces
 #define inputStr(x)            \
     illog(Colors::CYAN);       \
-    std::cin.ignore();         \
     std::getline(std::cin, x); \
     illog(Colors::RESET)
 
@@ -94,7 +93,8 @@ void mainLoop() {
                     break;
 
                 case 3:
-                    system->showHouses();
+                    houseBrowserLoop();
+                    skipPause = true;
                     break;
 
                 case 4:
@@ -148,7 +148,8 @@ void mainLoop() {
                 }
 
                 case 3:
-                    system->showHouses();
+                    system->displayHouseBrowser();
+                    skipPause = true;
                     break;
 
                 case 0:
@@ -319,8 +320,102 @@ void houseDetailsLoop() {
                 break;
 
             case 0:
-                // Exit profile loop
+                // Exit house details loop
                 break;
+
+            default:
+                logError("Error: Invalid choice!");
+                choice = -1;
+
+                skipLine();
+                std::system("PAUSE");  // Only works on Windows.
+                break;
+        }
+
+        // Exit the loop if the user
+        // wishes to quit the program.
+        if (choice == 0)
+            break;
+    }
+
+    // Wait for user to press enter.
+    if (choice != 0) {
+        skipLine();
+        std::system("PAUSE");  // Only works on Windows.
+    }
+}
+
+void houseBrowserLoop() {
+    System *system = System::getInstance();
+
+    int choice = -1;
+
+    // Execute house browser loop
+    while (choice != 0) {
+        // Clear screen
+        std::system("cls");
+
+        // Display the house browser menu
+        displayHouseBrowserMenu();
+
+        // Get user choice.
+        illogInfo("Enter your choice: ");
+
+        std::string buffer;
+        input(buffer);
+
+        // Check if the user entered an integer.
+        if (checkIfInteger(buffer)) {
+            choice = std::stoi(buffer);
+        } else {
+            logError("Error: Invalid input. Please enter an integer.");
+
+            // Wait for user to press enter.
+            skipLine();
+            std::system("PAUSE");  // Only works on Windows.
+
+            continue;
+        }
+
+        skipLine();
+        log(DIVIDER);
+
+        // Process user choice.
+        switch (choice) {
+            case 1:
+                system->displayHouseBrowser();
+                break;
+
+            case 2: {
+                string location;
+                system->displayAvailableLocations();
+
+                illogInfo("Enter location: ");
+
+                if (std::cin.peek() == '\n') std::cin.ignore();
+                inputStr(location);
+
+                // Check if the location is available.
+                if (!system->isLocationAvailable(location)) {
+                    skipLine();
+                    logError("Location is not available.");
+
+                    skipLine();
+                    std::system("PAUSE");  // Only works on Windows.
+
+                    break;
+                }
+
+                skipLine();
+                log(DIVIDER);
+
+                system->displayHouseBrowser(location);
+                break;
+            }
+
+            case 0:
+                // Exit house browser loop
+                return;
 
             default:
                 logError("Error: Invalid choice!");

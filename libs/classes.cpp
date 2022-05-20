@@ -96,6 +96,86 @@ std::string generate_uuid_v4() {
 }  // namespace uuid
 
 namespace HouseExchanger {
+//* Date Class
+// Default constructor
+Date::Date() {}
+
+// Destructor
+Date::~Date() {}
+
+// Copy constructor
+Date::Date(const Date& other) {
+    day = other.day;
+    month = other.month;
+    year = other.year;
+}
+
+// Assignment operator
+Date& Date::operator=(const Date& other) {
+    day = other.day;
+    month = other.month;
+    year = other.year;
+    return *this;
+}
+
+// Setters
+void Date::setDay(int day) { this->day = day; }
+void Date::setMonth(int month) { this->month = month; }
+void Date::setYear(int year) { this->year = year; }
+
+// Getters
+int Date::getDay() { return day; }
+int Date::getMonth() { return month; }
+int Date::getYear() { return year; }
+
+// Other methods
+string Date::toString() {
+    std::stringstream ss;
+    ss << day << "/" << month << "/" << year;
+    return ss.str();
+}
+
+string Date::getMonthStr() {
+    switch (month) {
+        case 1:
+            return "January";
+        case 2:
+            return "February";
+        case 3:
+            return "March";
+        case 4:
+            return "April";
+        case 5:
+            return "May";
+        case 6:
+            return "June";
+        case 7:
+            return "July";
+        case 8:
+            return "August";
+        case 9:
+            return "September";
+        case 10:
+            return "October";
+        case 11:
+            return "November";
+        case 12:
+            return "December";
+
+        default:
+            return "";
+    }
+}
+
+string Date::toDateString() {
+    std::stringstream ss;
+    ss << day << (day % 10 == 1 ? "st" : day % 10 == 2 ? "nd"
+                                     : day % 10 == 3   ? "rd"
+                                                       : "th")
+       << " " << getMonthStr() << " " << year;
+    return ss.str();
+}
+
 //* House Class
 // Default constructor
 House::House() {}
@@ -783,25 +863,49 @@ bool System::deleteProfile(string password) {
 }
 
 // User related methods
-void System::showHouses() {
+void System::displayHouseBrowser(string location) {
+    log(Colors::BLUE << Colors::BOLD << "\t     "
+                     << "House Browser"
+                     << Colors::RESET << newl);
+
     if (houses.size() == 0) {
+        skipLine();
         logInfo("There are no houses on our system.");
         return;
     }
 
     // Display all houses
-    for (int i = 0; i < houses.size(); i++) {
-        logInfo(newl << "House " + std::to_string(i + 1) + ":" << newl);
+    int count = 0;
 
-        logInfo("Location: " + houses[i].getLocation());
-        logInfo("Description: " + houses[i].getDescription());
+    for (int i = 0; i < houses.size(); i++) {
+        // Skip houses that are not in the specified location
+        if (!location.empty() && location.compare(houses[i].getLocation()) != 0)
+            continue;
+
+        count++;
+
+        log(DIVIDER);
+        log(Colors::BLUE << Colors::BOLD
+                         << "\t\tHouse " + std::to_string(count)
+                         << Colors::RESET << newl);
+
+        logInfo("Location: " << Colors::GREEN << houses[i].getLocation());
+        logInfo("Description: " << Colors::GREEN << houses[i].getDescription());
 
         if (isUserLoggedIn || isUserAdmin) {
-            logInfo("Listing start: " + houses[i].getListingStart());
-            logInfo("Listing end: " + houses[i].getListingEnd());
-            logInfo("Consumption points: " + std::to_string(houses[i].getConsumptionPts()));
+            logInfo("Listing start: " << Colors::GREEN << houses[i].getListingStart());
+            logInfo("Listing end: " << Colors::GREEN << houses[i].getListingEnd());
+            logInfo("Consumption points: " << Colors::GREEN << std::to_string(houses[i].getConsumptionPts()));
         }
     }
+
+    if (count == 0) {
+        log(DIVIDER);
+        logInfo("There are no houses in " + location + ".");
+    }
+
+    skipLine();
+    std::system("pause");
 }
 
 // Resouce management methods
