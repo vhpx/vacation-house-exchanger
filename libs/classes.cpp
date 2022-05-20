@@ -1425,7 +1425,7 @@ bool System::shutdown() {
 
     log(DIVIDER);
     skipLine();
-    notify("Exiting...", Colors::GREEN);
+    notify("Exiting...");
     skipLine();
 
     return true;
