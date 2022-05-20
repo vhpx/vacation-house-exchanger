@@ -165,7 +165,7 @@ bool House::updateInfo() {
     System* system = System::getInstance();
     Member* owner = system->getCurrentMember();
 
-    owner->setupHouse();
+    owner->listHouse();
 
     return true;
 }
@@ -390,7 +390,7 @@ House* Member::getHouse() {
     return this->house;
 }
 
-bool Member::setupHouse() {
+bool Member::listHouse() {
     // Get user input.
     string location, description, listingStart, listingEnd;
     int consumptionPts;
@@ -1389,7 +1389,7 @@ void System::showUserHouseDetails() {
         }
 
         skipLine();
-        currentMember->setupHouse();
+        currentMember->listHouse();
 
         return;
     }
@@ -1464,6 +1464,59 @@ bool System::isLocationAvailable(string location) {
             return true;
     }
 
+    return false;
+}
+
+bool System::unlistCurrentHouse() {
+    if (currentMember == nullptr) {
+        logError("You are not logged in.");
+        return false;
+    }
+
+    House* house = currentMember->getHouse();
+
+    if (house == nullptr) {
+        logError("You don't have any house on the system.");
+        return false;
+    }
+
+    string response;
+    illogInfo("Are you sure you want to unlist your house? (Y/N): ");
+    input(response);
+
+    if (response == "N" || response == "n") {
+        skipLine();
+        return false;
+    }
+
+    if (response != "Y" && response != "y") {
+        skipLine();
+        logError("Invalid response.");
+        skipLine();
+
+        std::system("PAUSE");  // Only works on Windows.
+        return false;
+    }
+
+    for (int i = 0; i < houses.size(); i++) {
+        if (houses[i].getId().compare(house->getId()) == 0) {
+            // Remove house from current member
+            currentMember->setHouse(nullptr);
+
+            // Remove house from houses list
+            houses.erase(houses.begin() + i);
+
+            skipLine();
+            logSuccess("House unlisted.");
+
+            skipLine();
+            std::system("PAUSE");  // Only works on Windows.
+
+            return true;
+        }
+    }
+
+    // Couldn't find house in houses list
     return false;
 }
 }  // namespace HouseExchanger

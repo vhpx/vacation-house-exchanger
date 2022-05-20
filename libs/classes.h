@@ -132,7 +132,9 @@ class Member : public Guest {
     House* getHouse();
     int getCreditPoints();
 
-    bool setupHouse();
+    bool listHouse();
+    bool unlistHouse();
+
     void viewHouseDetail(House* house);
 };
 
@@ -316,8 +318,11 @@ class System {
     bool isLoggedIn();
     bool isAdmin();
 
+    bool unlistCurrentHouse();
+
     bool isLocationAvailable(string location);
     void displayAvailableLocations();
+
     void showUserProfile();
     void showUserHouseDetails();
 };

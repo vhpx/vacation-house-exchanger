@@ -180,7 +180,8 @@ void displayHouseDetailsMenu() {
         "Update house information",
         "View requests",
         "View comments",
-        "View ratings"};
+        "View ratings",
+        "Unlist house"};
 
     displayMenuOptions(options);
 

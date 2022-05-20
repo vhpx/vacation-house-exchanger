@@ -138,7 +138,7 @@ void mainLoop() {
                         skipLine();
                         skipPause = true;
 
-                        while (!newMember->setupHouse()) {
+                        while (!newMember->listHouse()) {
                             std::system("cls");
                             logError("Error: Failed to setup house. Please try again.");
                             skipLine();
@@ -303,11 +303,19 @@ void houseDetailsLoop() {
                 break;
 
             case 2:
-                // currentUser->changePassword();
+                // "View requests",
                 break;
 
             case 3:
-                // if (currentUser->deleteProfile()) return;
+                // "View comments",
+                break;
+
+            case 4:
+                // "View ratings",
+                break;
+
+            case 5:
+                if (system->unlistCurrentHouse()) return;
                 break;
 
             case 0:
