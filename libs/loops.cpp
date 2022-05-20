@@ -60,6 +60,7 @@ void mainLoop() {
             choice = std::stoi(buffer);
         } else {
             logError("Error: Invalid input. Please enter an integer.");
+            choice = -1;
 
             // Wait for user to press enter.
             skipLine();
@@ -67,6 +68,7 @@ void mainLoop() {
 
             // Clear screen
             std::system("cls");
+
             continue;
         }
 
@@ -87,7 +89,7 @@ void mainLoop() {
                     break;
 
                 case 2:
-                    system->showUserHouseDetails();
+                    houseDetailsLoop();
                     skipPause = true;
                     break;
 
@@ -214,7 +216,7 @@ void profileLoop() {
         // Process user choice.
         switch (choice) {
             case 1:
-                currentUser->updateProfile();
+                currentUser->updateInfo();
                 break;
 
             case 2:
@@ -223,6 +225,88 @@ void profileLoop() {
 
             case 3:
                 if (currentUser->deleteProfile()) return;
+                break;
+
+            case 0:
+                // Exit profile loop
+                break;
+
+            default:
+                logError("Error: Invalid choice!");
+                choice = -1;
+
+                skipLine();
+                std::system("PAUSE");  // Only works on Windows.
+                break;
+        }
+
+        // Exit the loop if the user
+        // wishes to quit the program.
+        if (choice == 0)
+            break;
+    }
+
+    // Wait for user to press enter.
+    if (choice != 0) {
+        skipLine();
+        std::system("PAUSE");  // Only works on Windows.
+    }
+}
+
+void houseDetailsLoop() {
+    System *system = System::getInstance();
+    Member *currentUser = system->getCurrentMember();
+    House *currentHouse = currentUser->getHouse();
+
+    int choice = -1;
+
+    // Execute house details loop
+    while (choice != 0) {
+        // Clear screen
+        std::system("cls");
+
+        if (currentHouse == nullptr) {
+            system->showUserHouseDetails();
+            return;
+        }
+
+        // Display the house details menu
+        displayHouseDetailsMenu();
+
+        // Get user choice.
+        illogInfo("Enter your choice: ");
+
+        std::string buffer;
+        input(buffer);
+
+        // Check if the user entered an integer.
+        if (checkIfInteger(buffer)) {
+            choice = std::stoi(buffer);
+        } else {
+            logError("Error: Invalid input. Please enter an integer.");
+
+            // Wait for user to press enter.
+            skipLine();
+            std::system("PAUSE");  // Only works on Windows.
+
+            continue;
+        }
+
+        skipLine();
+        log(DIVIDER);
+
+        // Process user choice.
+        switch (choice) {
+            case 1:
+                currentHouse->updateInfo();
+                break;
+
+            case 2:
+                // currentUser->changePassword();
+                break;
+
+            case 3:
+                // if (currentUser->deleteProfile()) return;
                 break;
 
             case 0:

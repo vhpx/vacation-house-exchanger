@@ -13,4 +13,5 @@ void displayMenuOptions(std::vector<std::string>& options);
 //* Menus
 void displayDefaultMenu();
 void displayProfileMenu();
+void displayHouseDetailsMenu();
 }  // namespace HouseExchanger

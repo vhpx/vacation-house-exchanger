@@ -162,4 +162,29 @@ void displayProfileMenu() {
     logInfo(newl << Colors::BOLD << "[0] " << Colors::RED << "Back");
     log(DIVIDER << newl);
 }
+
+void displayHouseDetailsMenu() {
+    System* system = System::getInstance();
+
+    displayAppHeader();
+
+    log(DIVIDER);
+    system->showUserHouseDetails();
+
+    log(DIVIDER);
+    log(Colors::BLUE << Colors::BOLD
+                     << "\tPlease select an option"
+                     << Colors::RESET << newl);
+
+    std::vector<std::string> options = {
+        "Update house information",
+        "View requests",
+        "View comments",
+        "View ratings"};
+
+    displayMenuOptions(options);
+
+    logInfo(newl << Colors::BOLD << "[0] " << Colors::RED << "Back");
+    log(DIVIDER << newl);
+}
 }  // namespace HouseExchanger

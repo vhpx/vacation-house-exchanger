@@ -7,6 +7,7 @@
 #include <string>
 
 #include "colors.h"
+#include "utils.h"
 
 //* Constants
 // Preferences
@@ -160,6 +161,15 @@ int House::getConsumptionPts() {
     return this->consumptionPts;
 }
 
+bool House::updateInfo() {
+    System* system = System::getInstance();
+    Member* owner = system->getCurrentMember();
+
+    owner->setupHouse();
+
+    return true;
+}
+
 //* Guest class
 // Default constructor
 Guest::Guest() {}
@@ -272,7 +282,7 @@ bool Member::changePassword() {
     return changeSuccessful;
 }
 
-bool Member::updateProfile() {
+bool Member::updateInfo() {
     // Get user input.
     string fullName, phone;
 
@@ -347,6 +357,10 @@ void Member::setHouse(House* house) {
     this->house = house;
 }
 
+void Member::setCreditPoints(int creditPoints) {
+    this->creditPoints = creditPoints;
+}
+
 // Getters
 string Member::getId() {
     return this->id;
@@ -368,8 +382,8 @@ string Member::getPhone() {
     return this->phone;
 }
 
-int Member::getCreditPoint() {
-    return this->creditPoint;
+int Member::getCreditPoints() {
+    return this->creditPoints;
 }
 
 House* Member::getHouse() {
@@ -380,6 +394,7 @@ bool Member::setupHouse() {
     // Get user input.
     string location, description, listingStart, listingEnd;
     int consumptionPts;
+    bool validPts = false;
 
     System* system = System::getInstance();
     system->displayAvailableLocations();
@@ -409,8 +424,20 @@ bool Member::setupHouse() {
     illogInfo("Listing end date (dd/mm/yyyy): ");
     input(listingEnd);
 
-    illogInfo("Consumption points: ");
-    input(consumptionPts);
+    while (!validPts) {
+        string buffer;
+        illogInfo("Consumption points: ");
+        input(buffer);
+
+        if (checkIfInteger(buffer)) {
+            consumptionPts = std::stoi(buffer);
+            validPts = true;
+        } else {
+            skipLine();
+            logError("Invalid input.");
+            skipLine();
+        }
+    }
 
     // Create a new house object to store the data.
     House house;
@@ -423,8 +450,12 @@ bool Member::setupHouse() {
     house.setListingEnd(listingEnd);
     house.setConsumptionPts(consumptionPts);
 
+    // Check for existing house ID.
+    string houseId = this->getHouse() != nullptr ? this->getHouse()->getId() : "";
+    if (!houseId.empty()) house.setId(houseId);
+
     // Add the house to the system.
-    House* savedHouse = System::getInstance()->addHouse(house);
+    House* savedHouse = System::getInstance()->addHouse(house, houseId);
 
     skipLine();
     if (savedHouse != nullptr) {
@@ -770,7 +801,7 @@ void System::showHouses() {
 }
 
 // Resouce management methods
-Member* System::addMember(Member member) {
+Member* System::addMember(Member member, string id) {
     // Check if username is already taken
     for (int i = 0; i < members.size(); i++) {
         if (members[i].getUsername() == member.getUsername()) {
@@ -781,48 +812,67 @@ Member* System::addMember(Member member) {
     }
 
     // Generate member ID
-    string id = generateId();
-    member.setId(id);
+    if (id.empty()) {
+        string id = generateId();
+        member.setId(id);
+    }
 
     // Add member to members vector
     members.push_back(member);
     return &members.back();
 }
 
-House* System::addHouse(House house) {
-    // Generate house ID
-    string id = generateId();
-    house.setId(id);
+House* System::addHouse(House house, string id) {
+    // Generate house ID if not provided
+    if (id.empty()) {
+        string id = generateId();
+        house.setId(id);
+    } else {
+        // Check if house already exists
+        // if it does, update the house
+        for (int i = 0; i < houses.size(); i++) {
+            if (houses[i].getId() == id) {
+                houses[i] = house;
+                return &houses[i];
+            }
+        }
+    }
 
     // Add house to houses vector
     houses.push_back(house);
     return &houses.back();
 }
 
-Rating* System::addRating(Rating rating) {
+Rating* System::addRating(Rating rating, string id) {
     // Generate rating ID
-    string id = generateId();
-    rating.setId(id);
+    if (id.empty()) {
+        string id = generateId();
+        rating.setId(id);
+    }
 
     // Add rating to ratings vector
     ratings.push_back(rating);
     return &ratings.back();
 }
 
-Comment* System::addComment(Comment comment) {
+Comment* System::addComment(Comment comment, string id) {
     // Generate comment ID
-    string id = generateId();
-    comment.setId(id);
+    if (id.empty()) {
+        string id = generateId();
+        comment.setId(id);
+    }
 
     // Add comment to comments vector
     comments.push_back(comment);
     return &comments.back();
 }
 
-Request* System::addRequest(Request request) {
+Request* System::addRequest(Request request, string id) {
     // Generate request ID
-    string id = generateId();
-    request.setId(id);
+    if (id.empty()) {
+        string id = generateId();
+        request.setId(id);
+    }
 
     // Add request to requests vector
     requests.push_back(request);
@@ -851,7 +901,7 @@ bool System::loadMembers() {
             tokens.push_back(item);
         }
 
-        if (tokens.size() != 5) {
+        if (tokens.size() != 6) {
             notify("Error: Invalid Member format.", Colors::RED);
             continue;
         }
@@ -863,6 +913,7 @@ bool System::loadMembers() {
         member.setPassword(tokens[2]);
         member.setFullName(tokens[3]);
         member.setPhone(tokens[4]);
+        member.setCreditPoints(stoi(tokens[5]));
 
         members.push_back(member);
     }
@@ -1080,7 +1131,7 @@ bool System::saveMembers() {
     for (Member member : members) {
         file << member.getId() << "," << member.getUsername() << ","
              << member.getPassword() << "," << member.getFullName() << ","
-             << member.getPhone() << newl;
+             << member.getPhone() << "," << member.getCreditPoints() << newl;
     }
 
     file.close();
@@ -1292,7 +1343,7 @@ void System::showUserProfile() {
     }
 
     log(Colors::BLUE << Colors::BOLD
-                     << "\t\tUser Profile"
+                     << "\t\tYour Profile"
                      << Colors::RESET << newl);
 
     logInfo("ID: " << Colors::GREEN << currentMember->getId());
@@ -1306,6 +1357,10 @@ void System::showUserHouseDetails() {
         logError("You are not logged in.");
         return;
     }
+
+    log(Colors::BLUE << Colors::BOLD
+                     << "\t\tYour House"
+                     << Colors::RESET << newl);
 
     House* house = currentMember->getHouse();
 
@@ -1331,6 +1386,7 @@ void System::showUserHouseDetails() {
 
         skipLine();
         currentMember->setupHouse();
+
         return;
     }
 
@@ -1340,9 +1396,6 @@ void System::showUserHouseDetails() {
     logInfo("Listing start: " << Colors::GREEN << house->getListingStart());
     logInfo("Listing end: " << Colors::GREEN << house->getListingEnd());
     logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
-
-    skipLine();
-    std::system("PAUSE");  // Only works on Windows.
 }
 
 Member* System::getMember(string id) {

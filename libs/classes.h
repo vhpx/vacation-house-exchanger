@@ -64,6 +64,9 @@ class House {
     string getListingEnd();
 
     int getConsumptionPts();
+
+    //* Miscellaneous
+    bool updateInfo();
 };
 
 class Guest {
@@ -90,7 +93,7 @@ class Member : public Guest {
     string phone = "";
 
     House* house = nullptr;
-    int creditPoint = 500;
+    int creditPoints = 500;
 
    public:
     //* Default constructor
@@ -108,7 +111,7 @@ class Member : public Guest {
     bool verifyPassword(string password);
     bool changePassword();
 
-    bool updateProfile();
+    bool updateInfo();
     bool deleteProfile();
 
     //* Setters
@@ -118,6 +121,7 @@ class Member : public Guest {
     void setFullName(string fullName);
     void setPhone(string phone);
     void setHouse(House* house);
+    void setCreditPoints(int creditPoints);
 
     //* Getters
     string getId();
@@ -126,7 +130,7 @@ class Member : public Guest {
     string getFullName();
     string getPhone();
     House* getHouse();
-    int getCreditPoint();
+    int getCreditPoints();
 
     bool setupHouse();
     void viewHouseDetail(House* house);
@@ -271,11 +275,11 @@ class System {
     // Resouce management methods
     void showHouses();
 
-    Member* addMember(Member member);
-    House* addHouse(House house);
-    Rating* addRating(Rating rating);
-    Comment* addComment(Comment comment);
-    Request* addRequest(Request request);
+    Member* addMember(Member member, string id = "");
+    House* addHouse(House house, string id = "");
+    Rating* addRating(Rating rating, string id = "");
+    Comment* addComment(Comment comment, string id = "");
+    Request* addRequest(Request request, string id = "");
 
     Member* getMember(string id);
     House* getHouse(string id);
