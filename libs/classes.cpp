@@ -1156,15 +1156,17 @@ Member* System::addMember(Member member, string id) {
         }
     }
 
-    // Generate member ID
-    if (id.empty()) {
-        string id = generateId();
-        member.setId(id);
-    }
-
     // Add member to members vector
     members.push_back(member);
-    return &members.back();
+    Member* newMember = &members.back();
+
+    // Generate member ID
+    if (newMember->getId().empty()) {
+        string id = generateId();
+        newMember->setId(id);
+    }
+
+    return newMember;
 }
 
 House* System::addHouse(House house, string id) {
