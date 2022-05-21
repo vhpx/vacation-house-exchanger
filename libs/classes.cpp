@@ -21,6 +21,7 @@ const string MEMBERS_FILE = "members.dat";
 const string HOUSES_FILE = "houses.dat";
 const string RATINGS_FILE = "ratings.dat";
 const string COMMENTS_FILE = "comments.dat";
+const string REQUESTS_FILE = "requests.dat";
 
 //* Helper preprocessor macros
 // I/O macros
@@ -53,8 +54,6 @@ const string COMMENTS_FILE = "comments.dat";
 
 using std::string;
 using std::vector;
-
-const string REQUESTS_FILE = "requests.dat";
 
 string getFilePath(const string& fileName) {
     return DATA_PATH + fileName;
@@ -249,6 +248,99 @@ int Date::compare(Date date1, Date date2) {
     }
 }
 
+int Date::getDurationInDays(Date date1, Date date2) {
+    int days = 0;
+
+    int year1 = date1.getYear();
+    int month1 = date1.getMonth();
+    int day1 = date1.getDay();
+
+    int year2 = date2.getYear();
+    int month2 = date2.getMonth();
+    int day2 = date2.getDay();
+
+    // If the first date is after the second date
+    if (year1 > year2 || (year1 == year2 && month1 > month2) ||
+        (year1 == year2 && month1 == month2 && day1 > day2)) {
+        int temp = year1;
+        year1 = year2;
+        year2 = temp;
+
+        temp = month1;
+        month1 = month2;
+        month2 = temp;
+
+        temp = day1;
+        day1 = day2;
+        day2 = temp;
+    }
+
+    // If the first date is the same as the second date
+    if (year1 == year2 && month1 == month2 && day1 == day2)
+        return 0;
+
+    // Calculate the number of days between the two dates
+    if (year1 == year2) {
+        if (month1 == month2) {
+            days = day2 - day1;
+        } else {
+            for (int i = month1; i < month2; i++) {
+                if (i == 1 || i == 3 || i == 5 || i == 7 || i == 8 || i == 10 ||
+                    i == 12)
+                    days += 31;
+                else if (i == 4 || i == 6 || i == 9 || i == 11)
+                    days += 30;
+                else if (i == 2) {
+                    if (year1 % 4 == 0)
+                        days += 29;
+                    else
+                        days += 28;
+                }
+            }
+            days += day2;
+        }
+    } else {
+        for (int i = year1; i < year2; i++) {
+            if (i % 4 == 0)
+                days += 366;
+            else
+                days += 365;
+        }
+
+        for (int i = month1; i < 13; i++) {
+            if (i == 1 || i == 3 || i == 5 || i == 7 || i == 8 || i == 10 ||
+                i == 12)
+                days += 31;
+            else if (i == 4 || i == 6 || i == 9 || i == 11)
+                days += 30;
+            else if (i == 2) {
+                if (year1 % 4 == 0)
+                    days += 29;
+                else
+                    days += 28;
+            }
+        }
+
+        for (int i = 1; i < month2; i++) {
+            if (i == 1 || i == 3 || i == 5 || i == 7 || i == 8 || i == 10 ||
+                i == 12)
+                days += 31;
+            else if (i == 4 || i == 6 || i == 9 || i == 11)
+                days += 30;
+            else if (i == 2) {
+                if (year1 % 4 == 0)
+                    days += 29;
+                else
+                    days += 28;
+            }
+        }
+
+        days += day2;
+    }
+
+    return days + 1;
+}
+
 //* House Class
 // Default constructor
 House::House() {}
@@ -314,11 +406,23 @@ int House::getConsumptionPts() {
     return this->consumptionPts;
 }
 
+bool House::isOccupied() {
+    return occupier != nullptr;
+}
+
 bool House::updateInfo() {
     System* system = System::getInstance();
     Member* owner = system->getCurrentMember();
 
     owner->listHouse();
+
+    return true;
+}
+
+bool House::isAvailable(Date startingDate, Date endingDate) {
+    if (Date::compare(startingDate, listingStart) < 0 ||
+        Date::compare(endingDate, listingEnd) > 0)
+        return false;
 
     return true;
 }
@@ -647,6 +751,28 @@ void Member::viewHouseDetail(House* house) {
     logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
 }
 
+bool Member::isEligibleToBook(House* house, Date staringDate, Date endingDate) {
+    // Check if the house already has an occupant.
+    if (house->isOccupied()) {
+        logError("House is already occupied.");
+        return false;
+    }
+
+    // Check if the house is available.
+    if (!house->isAvailable(staringDate, endingDate)) {
+        logError("House is not available.");
+        return false;
+    }
+
+    // Check if the member has enough credit points.
+    if (this->getCreditPoints() < Date::getDurationInDays(staringDate, endingDate) * house->getConsumptionPts()) {
+        logError("You don't have enough credit points.");
+        return false;
+    }
+
+    return true;
+}
+
 //* Rating class
 // Default constructor
 Rating::Rating() {}
@@ -708,10 +834,6 @@ void Request::setRequester(Member* requester) {
     this->requester = requester;
 }
 
-void Request::setContent(string content) {
-    this->content = content;
-}
-
 void Request::setStatus(int status) {
     this->status = status;
 }
@@ -727,10 +849,6 @@ House* Request::getHouse() {
 
 Member* Request::getRequester() {
     return this->requester;
-}
-
-string Request::getContent() {
-    return this->content;
 }
 
 int Request::getStatus() {
@@ -951,23 +1069,22 @@ bool System::deleteProfile(string password) {
 }
 
 // User related methods
-vector<House*> System::getAvailableHouses(string location, Date startingDate, Date endingDate) {
-    vector<House*> availableHouses;
-
+void System::getAvailableHouses(vector<House*>& buffer, bool eligibleOnly, string location, Date startingDate, Date endingDate) {
     for (int i = 0; i < houses.size(); i++) {
-        if (houses[i].getLocation().compare(location) != 0)
+        if (eligibleOnly && houses[i].getLocation().compare(location) != 0)
             continue;
 
-        if (Date::compare(startingDate, houses[i].getListingStart()) < 0)
+        if (eligibleOnly && Date::compare(startingDate, houses[i].getListingStart()) < 0)
             continue;
 
-        if (Date::compare(endingDate, houses[i].getListingEnd()) > 0)
+        if (eligibleOnly && Date::compare(endingDate, houses[i].getListingEnd()) > 0)
             continue;
 
-        availableHouses.push_back(&houses[i]);
+        if (eligibleOnly && houses[i].getOwner() == currentMember)
+            continue;
+
+        buffer.push_back(&houses[i]);
     }
-
-    return availableHouses;
 }
 
 void System::displayHouseBrowser(bool eligibleOnly, string location, Date startingDate, Date endingDate) {
@@ -984,13 +1101,16 @@ void System::displayHouseBrowser(bool eligibleOnly, string location, Date starti
     // Display all houses
 
     if (eligibleOnly) {
-        vector<House*> availableHouses = getAvailableHouses(location, startingDate, endingDate);
+        vector<House*> availableHouses;
+        getAvailableHouses(availableHouses, true, location, startingDate, endingDate);
 
         if (availableHouses.size() == 0) {
             skipLine();
-            logInfo("There are no available houses that match your status.");
+            logInfo("There are no eligible houses.");
             return;
         }
+
+        int days = Date::getDurationInDays(startingDate, endingDate);
 
         for (int i = 0; i < availableHouses.size(); i++) {
             log(DIVIDER);
@@ -998,14 +1118,13 @@ void System::displayHouseBrowser(bool eligibleOnly, string location, Date starti
                              << "\t\tHouse " + std::to_string(i + 1)
                              << Colors::RESET << newl);
 
-            logInfo("Location: " << Colors::GREEN << houses[i].getLocation());
-            logInfo("Description: " << Colors::GREEN << houses[i].getDescription());
-
-            if (isUserLoggedIn || isUserAdmin) {
-                logInfo("Listing start: " << Colors::GREEN << houses[i].getListingStart().toDateString());
-                logInfo("Listing end: " << Colors::GREEN << houses[i].getListingEnd().toDateString());
-                logInfo("Consumption points: " << Colors::GREEN << std::to_string(houses[i].getConsumptionPts()));
-            }
+            logInfo("Location: " << Colors::GREEN << availableHouses[i]->getLocation());
+            logInfo("Description: " << Colors::GREEN << availableHouses[i]->getDescription());
+            logInfo("Available from: " << Colors::GREEN << availableHouses[i]->getListingStart().toDateString());
+            logInfo("Until: " << Colors::GREEN << availableHouses[i]->getListingEnd().toDateString());
+            logInfo("Consumption points (per day): " << Colors::GREEN << std::to_string(availableHouses[i]->getConsumptionPts()));
+            logInfo("Expected consumption points: " << Colors::GREEN
+                                                    << days * availableHouses[i]->getConsumptionPts());
         }
     } else {
         for (int i = 0; i < houses.size(); i++) {
@@ -1020,7 +1139,7 @@ void System::displayHouseBrowser(bool eligibleOnly, string location, Date starti
             if (isUserLoggedIn || isUserAdmin) {
                 logInfo("Listing start: " << Colors::GREEN << houses[i].getListingStart().toDateString());
                 logInfo("Listing end: " << Colors::GREEN << houses[i].getListingEnd().toDateString());
-                logInfo("Consumption points: " << Colors::GREEN << std::to_string(houses[i].getConsumptionPts()));
+                logInfo("Consumption points (per day): " << Colors::GREEN << std::to_string(houses[i].getConsumptionPts()));
             }
         }
     }
@@ -1456,8 +1575,7 @@ bool System::saveRequests() {
     }
 
     for (Request request : requests) {
-        file << request.getHouse() << "," << request.getRequester()
-             << "," << request.getContent() << newl;
+        file << request.getHouse() << "," << request.getRequester() << newl;
     }
 
     file.close();

@@ -392,8 +392,29 @@ void houseSelectorLoop(bool eligibleOnly, string location, Date startingDate, Da
             case 1: {
                 int houseNumber;
 
+                // Get user selection.
                 illogInfo("Enter the house number: ");
                 input(houseNumber);
+                skipLine();
+
+                // Get available houses.
+                vector<House *> houses;
+                system->getAvailableHouses(houses, false, location, startingDate, endingDate);
+
+                // Get house at [number - 1] index.
+                House *house = houses[houseNumber - 1];
+
+                // Check if the user is eligible to book the house.
+                if (currentUser->isEligibleToBook(house, startingDate, endingDate)) {
+                    // Book the house.
+                    // currentUser->bookHouse(house);
+                    logInfo("Successfully booked the house!");
+                } else {
+                    logError("Error: You are not eligible to book this house.");
+                }
+
+                skipLine();
+                std::system("PAUSE");  // Only works on Windows.
 
                 break;
             }
@@ -462,7 +483,11 @@ void houseBrowserLoop() {
         // Process user choice.
         switch (choice) {
             case 1:
-                houseSelectorLoop(false, "", Date(), Date());
+                system->displayHouseBrowser(false, "", Date(), Date());
+
+                // Wait for user to press enter.
+                skipLine();
+                std::system("PAUSE");  // Only works on Windows.
                 break;
 
             case 2: {
@@ -488,7 +513,7 @@ void houseBrowserLoop() {
                 Date startingDate, endingDate;
 
                 string buffer;
-                illogInfo("Listing start date (dd/mm/yyyy): ");
+                illogInfo("Start date (dd/mm/yyyy): ");
                 input(buffer);
 
                 while (!Date::isValid(buffer)) {
@@ -498,7 +523,7 @@ void houseBrowserLoop() {
 
                 startingDate = Date::parse(buffer);
 
-                illogInfo("Listing end date (dd/mm/yyyy): ");
+                illogInfo("End date (dd/mm/yyyy): ");
                 input(buffer);
 
                 while (!Date::isValid(buffer)) {

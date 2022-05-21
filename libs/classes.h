@@ -55,6 +55,7 @@ class Date {
     static bool isValid(string date);
     static Date parse(string date);
     static int compare(Date date1, Date date2);
+    static int getDurationInDays(Date date1, Date date2);
 
     string toString();
     string getMonthStr();
@@ -64,6 +65,7 @@ class Date {
 class House {
    private:
     Member* owner = nullptr;
+    Member* occupier = nullptr;
 
     string id;
     string location;
@@ -105,6 +107,8 @@ class House {
     int getConsumptionPts();
 
     //* Miscellaneous
+    bool isOccupied();
+    bool isAvailable(Date startingDate, Date endingDate);
     bool updateInfo();
 };
 
@@ -175,6 +179,7 @@ class Member : public Guest {
     bool unlistHouse();
 
     void viewHouseDetail(House* house);
+    bool isEligibleToBook(House* house, Date staringDate, Date endingDate);
 };
 
 class Rating {
@@ -209,8 +214,11 @@ class Request {
     string id = "";
     House* house = nullptr;
     Member* requester = nullptr;
-    string content = "";
-    int status = RequestStatus::PENDING;
+
+    Date startingDate = Date();
+    Date endingDate = Date();
+
+    int status = PENDING;
 
    public:
     // Default constructor
@@ -223,14 +231,12 @@ class Request {
     void setId(string id);
     void setHouse(House* house);
     void setRequester(Member* requester);
-    void setContent(string content);
     void setStatus(int status);
 
     // Getters
     string getId();
     House* getHouse();
     Member* getRequester();
-    string getContent();
     int getStatus();
 };
 
@@ -314,7 +320,7 @@ class System {
     void notify(string message, string color);
 
     // Resouce management methods
-    vector<House*> getAvailableHouses(string location, Date startingDate, Date endingDate);
+    void getAvailableHouses(vector<House*>& buffer, bool eligibleOnly, string location, Date startingDate, Date endingDate);
     void displayHouseBrowser(bool eligibleOnly, string location, Date startingDate, Date endingDate);
 
     Member* addMember(Member member, string id = "");

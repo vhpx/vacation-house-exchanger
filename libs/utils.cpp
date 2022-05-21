@@ -203,7 +203,7 @@ void displayHouseBrowserMenu() {
 
     std::vector<std::string> options = {
         "Browse all houses in the system",
-        "Browse houses with filters",
+        "Browse eligible houses for exchange",
     };
 
     displayMenuOptions(options);
