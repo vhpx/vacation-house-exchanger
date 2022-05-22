@@ -767,11 +767,6 @@ Member* Guest::login() {
     return System::getInstance()->login(username, password);
 }
 
-void Guest::viewHouseDetail(House* house) {
-    logInfo("Location: " << Colors::GREEN << house->getLocation());
-    logInfo("Description: " << Colors::GREEN << house->getDescription());
-}
-
 //* Member class
 // Default constructor
 Member::Member() {}
@@ -1044,14 +1039,6 @@ bool Member::listHouse() {
     std::system("PAUSE");  // Only works on Windows.
 
     return savedHouse != nullptr;
-}
-
-void Member::viewHouseDetail(House* house) {
-    logInfo("Location: " << Colors::GREEN << house->getLocation());
-    logInfo("Description: " << Colors::GREEN << house->getDescription());
-    logInfo("Listing start: " << Colors::GREEN << house->getListingStart().toDateString());
-    logInfo("Listing end: " << Colors::GREEN << house->getListingEnd().toDateString());
-    logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
 }
 
 bool Member::isEligibleToBook(House* house, Date startingDate, Date endingDate) {

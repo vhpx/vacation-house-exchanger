@@ -131,8 +131,6 @@ class Guest {
     //* Authentication methods
     virtual Member* signUp();
     virtual Member* login();
-
-    virtual void viewHouseDetail(House* house);
 };
 
 class Member : public Guest {
@@ -192,7 +190,6 @@ class Member : public Guest {
     bool listHouse();
     bool unlistHouse();
 
-    void viewHouseDetail(House* house);
     bool isEligibleToBook(House* house, Date staringDate, Date endingDate);
     bool bookHouse(House* house, Date startingDate, Date endingDate);
     void viewRatings();
