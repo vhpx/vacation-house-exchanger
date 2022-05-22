@@ -153,9 +153,21 @@ void displayDefaultMenu() {
         House* house = request->getHouse();
 
         log(DIVIDER);
-        logInfo("You have a " << Colors::CYAN << "pending request" << Colors::YELLOW
-                              << " for a house in " << Colors::GREEN
-                              << house->getLocation() << Colors::YELLOW << ".");
+
+        if (currentMember->getRequest()->getStatus() == PENDING)
+            logInfo("You have a " << Colors::CYAN << "pending request" << Colors::YELLOW
+                                  << " for a house in " << Colors::GREEN
+                                  << house->getLocation() << Colors::YELLOW << ".");
+        else if (currentMember->getRequest()->getStatus() == APPROVED)
+            logInfo("Your request for a house in " << Colors::GREEN
+                                                   << house->getLocation() << Colors::YELLOW
+                                                   << " has been " << Colors::GREEN
+                                                   << "approved" << Colors::YELLOW << ".");
+        else if (currentMember->getRequest()->getStatus() == DENIED)
+            logInfo("Your request for a house in " << Colors::GREEN
+                                                   << house->getLocation() << Colors::YELLOW
+                                                   << " has been " << Colors::RED
+                                                   << "rejected" << Colors::YELLOW << ".");
 
         logInfo("Your requested stay is from " << Colors::GREEN << request->getStartingDate().toDateString()
                                                << Colors::YELLOW << " to " << Colors::GREEN
@@ -241,7 +253,6 @@ void displayHouseDetailsMenu() {
     std::vector<std::string> options = {
         "Update house information",
         "View requests",
-        "View comments",
         "View ratings",
         "Unlist house",
     };
@@ -279,6 +290,24 @@ void displayHouseSelectorMenu() {
 
     std::vector<std::string> options = {
         "Request to occupy a house",
+    };
+
+    displayMenuOptions(options);
+
+    logInfo(newl << Colors::BOLD << "[0] " << Colors::RED << "Back");
+    log(DIVIDER << newl);
+}
+
+void displayHouseRequestsMenu() {
+    System* system = System::getInstance();
+
+    log(Colors::BLUE << Colors::BOLD
+                     << "\tPlease select an option"
+                     << Colors::RESET << newl);
+
+    std::vector<std::string> options = {
+        "Accept a request",
+        "Decline a request",
     };
 
     displayMenuOptions(options);

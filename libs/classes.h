@@ -86,6 +86,7 @@ class House {
 
     //* Setters
     void setOwner(Member* owner);
+    void setOccupier(Member* occupier);
     void setId(string id);
     void setLocation(string location);
     void setDescription(string description);
@@ -97,6 +98,7 @@ class House {
 
     //* Getters
     Member* getOwner();
+    Member* getOccupier();
     string getId();
     string getLocation();
     string getDescription();
@@ -109,7 +111,13 @@ class House {
     //* Miscellaneous
     bool isOccupied();
     bool isAvailable(Date startingDate, Date endingDate);
+
     bool updateInfo();
+    bool acceptRequest(Request* request);
+    bool denyRequest(Request* request);
+
+    void viewRequests();
+    void viewRatings();
 };
 
 class Guest {
@@ -334,6 +342,7 @@ class System {
 
     // Resouce management methods
     void getAvailableHouses(vector<House*>& buffer, bool eligibleOnly, string location, Date startingDate, Date endingDate);
+    void getRequests(vector<Request*>& buffer, House* house);
     void displayMemberBrowser();
     void displayHouseBrowser(bool eligibleOnly, string location, Date startingDate, Date endingDate);
 
@@ -343,17 +352,14 @@ class System {
     Comment* addComment(Comment comment, string id = "");
     Request* addRequest(Request request, string id = "");
 
+    bool addPoints(Member* member, int points);
+    bool removePoints(Member* member, int points);
+
     Member* getMember(string id);
     House* getHouse(string id);
     Rating* getRating(string id);
     Comment* getComment(string id);
     Request* getRequest(string id);
-
-    // void deleteMember(Member* member);
-    // void deleteHouse(House* house);
-    // void deleteRating(Rating* rating);
-    // void deleteComment(Comment* comment);
-    // void deleteRequest(Request* request);
 
     // Loading methods
     bool loadMembers();

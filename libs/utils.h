@@ -20,6 +20,7 @@ void displayProfileMenu();
 void displayHouseDetailsMenu();
 void displayHouseBrowserMenu();
 void displayHouseSelectorMenu();
+void displayHouseRequestsMenu();
 }  // namespace HouseExchanger
 
 #endif  // UTILS_INCLUDED

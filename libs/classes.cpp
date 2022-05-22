@@ -339,6 +339,10 @@ void House::setOwner(Member* owner) {
     this->owner = owner;
 }
 
+void House::setOccupier(Member* occupier) {
+    this->occupier = occupier;
+}
+
 void House::setId(string id) {
     this->id = id;
 }
@@ -366,6 +370,10 @@ void House::setConsumptionPts(int points) {
 // Getters
 Member* House::getOwner() {
     return owner;
+}
+
+Member* House::getOccupier() {
+    return occupier;
 }
 
 string House::getId() {
@@ -412,6 +420,237 @@ bool House::isAvailable(Date startingDate, Date endingDate) {
 
     return true;
 }
+
+void House::viewRequests() {
+    System* system = System::getInstance();
+    Member* owner = system->getCurrentMember();
+
+    if (owner->getId() != this->owner->getId()) {
+        logError("You are not the owner of this house.");
+
+        return;
+    }
+
+    vector<Request*> requests;
+    system->getRequests(requests, this);
+
+    if (requests.size() == 0) {
+        logInfo("There are no requests for this house.");
+
+        return;
+    }
+
+    logInfo("Requests for your listed house:");
+    skipLine();
+
+    for (int i = 0; i < requests.size(); i++) {
+        log(Colors::BLUE << Colors::BOLD
+                         << "\t\tRequest " + std::to_string(i + 1)
+                         << Colors::RESET << newl);
+
+        logInfo("Request ID: " << Colors::GREEN << requests[i]->getId());
+        logInfo("Requested by: " << Colors::GREEN << requests[i]->getRequester()->getFullName());
+        logInfo("Exchange from: " << Colors::GREEN << requests[i]->getStartingDate().toDateString());
+        logInfo("Exchange to: " << Colors::GREEN << requests[i]->getEndingDate().toDateString());
+
+        skipLine();
+        log(DIVIDER);
+    }
+
+    displayHouseRequestsMenu();
+
+    int choice = -1;
+
+    // Execute house details loop
+    while (choice != 0) {
+        // Get user choice.
+        illogInfo("Enter your choice: ");
+
+        std::string buffer;
+        input(buffer);
+
+        // Check if the user entered an integer.
+        if (checkIfInteger(buffer)) {
+            choice = std::stoi(buffer);
+        } else {
+            logError("Error: Invalid input. Please enter an integer.");
+
+            // Wait for user to press enter.
+            skipLine();
+            std::system("PAUSE");  // Only works on Windows.
+
+            continue;
+        }
+
+        // Exit the loop if the user
+        // wishes to quit the program.
+        if (choice == 0)
+            break;
+
+        skipLine();
+        log(DIVIDER);
+
+        // Process user choice.
+        switch (choice) {
+            case 1: {
+                int requestIndex = -1;
+                // Ask user to enter the request number.
+                illogInfo("Enter the request number: ");
+
+                // Get user input.
+                std::string buffer;
+                input(buffer);
+
+                // Check if the user entered an integer.
+                if (checkIfInteger(buffer)) {
+                    requestIndex = std::stoi(buffer) - 1;
+                } else {
+                    logError("Error: Invalid input. Please enter an integer.");
+
+                    // Wait for user to press enter.
+                    skipLine();
+                    std::system("PAUSE");  // Only works on Windows.
+
+                    continue;
+                }
+
+                acceptRequest(requests[requestIndex]);
+                return;
+            }
+
+            case 2: {
+                int requestIndex = -1;
+                // Ask user to enter the request number.
+                illogInfo("Enter the request number: ");
+
+                // Get user input.
+                std::string buffer;
+                input(buffer);
+
+                // Check if the user entered an integer.
+                if (checkIfInteger(buffer)) {
+                    requestIndex = std::stoi(buffer) - 1;
+                } else {
+                    logError("Error: Invalid input. Please enter an integer.");
+
+                    // Wait for user to press enter.
+                    skipLine();
+                    std::system("PAUSE");  // Only works on Windows.
+
+                    continue;
+                }
+
+                denyRequest(requests[requestIndex]);
+                return;
+            }
+
+            case 0:
+                // Exit house details loop
+                return;
+
+            default:
+                logError("Error: Invalid choice!");
+                choice = -1;
+
+                skipLine();
+                std::system("PAUSE");  // Only works on Windows.
+                break;
+        }
+    }
+}
+
+bool House::acceptRequest(Request* request) {
+    System* system = System::getInstance();
+    Member* owner = system->getCurrentMember();
+
+    if (owner->getId() != this->owner->getId()) {
+        logError("You are not the owner of this house.");
+
+        return false;
+    }
+
+    if (request->getStatus() != PENDING) {
+        logError("This request is not pending.");
+
+        return false;
+    }
+
+    if (request->getRequester()->getId() == owner->getId()) {
+        logError("You cannot accept your own request.");
+
+        return false;
+    }
+
+    int durationInDays = Date::getDurationInDays(request->getStartingDate(),
+                                                 request->getEndingDate());
+    int points = durationInDays * this->consumptionPts;
+
+    if (request->getRequester()->getCreditPoints() < points) {
+        logError("The requester does not have enough points.");
+
+        return false;
+    }
+
+    skipLine();
+    system->addPoints(owner, points);
+    logInfo(std::to_string(points) << " points" << Colors::GREEN << " has been added to your account.");
+
+    system->removePoints(request->getRequester(), points);
+    logInfo(std::to_string(points) << " points" << Colors::GREEN << " has been removed from the requester's account.");
+
+    request->getHouse()->setOccupier(request->getRequester());
+    request->setStatus(APPROVED);
+
+    skipLine();
+    logInfo("You have accepted the request from " << Colors::GREEN << request->getRequester()->getFullName() + ".");
+
+    // Remove all other pending requests for this house.
+    vector<Request*> requests;
+    system->getRequests(requests, this);
+
+    for (int i = 0; i < requests.size(); i++) {
+        if (requests[i]->getStatus() == PENDING &&
+            requests[i]->getRequester()->getId() != owner->getId()) {
+            requests[i]->setStatus(DENIED);
+        }
+    }
+
+    skipLine();
+    logInfo("All other pending requests have been denied.");
+
+    return true;
+}
+
+bool House::denyRequest(Request* request) {
+    System* system = System::getInstance();
+    Member* owner = system->getCurrentMember();
+
+    if (owner->getId() != this->owner->getId()) {
+        logError("You are not the owner of this house.");
+
+        return false;
+    }
+
+    if (request->getStatus() != PENDING) {
+        logError("This request is not pending.");
+
+        return false;
+    }
+
+    if (request->getRequester()->getId() == owner->getId()) {
+        logError("You cannot deny your own request.");
+
+        return false;
+    }
+
+    request->setStatus(DENIED);
+
+    logInfo("You have denied the request from " + request->getRequester()->getFullName() + ".");
+
+    return true;
+}
+
+void House::viewRatings() {}
 
 //* Guest class
 // Default constructor
@@ -783,6 +1022,8 @@ bool Member::bookHouse(House* house, Date startingDate, Date endingDate) {
     // Check if the request was added successfully.
     if (newRequest != nullptr) {
         logSuccess("Request added successfully.");
+        setRequest(newRequest);
+
         return true;
     } else {
         logError("Request failed.");
@@ -1356,7 +1597,7 @@ Request* System::addRequest(Request request, string id) {
     if (id.empty()) {
         // Check if the current user has any request.
         // If they do, return nullptr.
-        if (currentMember->getRequest() != nullptr) {
+        if (currentMember->getRequest() != nullptr && currentMember->getRequest()->getStatus() == PENDING) {
             skipLine();
             illogError("You already have a request.");
             return nullptr;
@@ -1603,7 +1844,7 @@ bool System::loadRequests() {
             tokens.push_back(item);
         }
 
-        if (tokens.size() != 5) {
+        if (tokens.size() != 6) {
             notify("Error: Invalid Request format.", Colors::RED);
             continue;
         }
@@ -1613,7 +1854,7 @@ bool System::loadRequests() {
         System* system = System::getInstance();
         House house;
 
-        string requesterId = tokens[0];
+        string requesterId = tokens[1];
         Member* requester = system->getMember(requesterId);
 
         if (requester == nullptr) {
@@ -1621,7 +1862,7 @@ bool System::loadRequests() {
             continue;
         }
 
-        string houseId = tokens[1];
+        string houseId = tokens[2];
         House* requestedHouse = system->getHouse(houseId);
 
         if (requestedHouse == nullptr) {
@@ -1629,14 +1870,20 @@ bool System::loadRequests() {
             continue;
         }
 
+        request.setId(tokens[0]);
         request.setRequester(requester);
         request.setHouse(requestedHouse);
-        request.setStartingDate(Date::parse(tokens[2]));
-        request.setEndingDate(Date::parse(tokens[3]));
-        request.setStatus(std::stoi(tokens[4]));
+        request.setStartingDate(Date::parse(tokens[3]));
+        request.setEndingDate(Date::parse(tokens[4]));
+        request.setStatus(std::stoi(tokens[5]));
 
         requests.push_back(request);
-        requester->setRequest(&requests.back());
+        Request* newRequest = &requests.back();
+
+        requester->setRequest(newRequest);
+
+        if (newRequest->getStatus() == APPROVED)
+            newRequest->getHouse()->setOccupier(requester);
     }
 
     file.close();
@@ -1758,11 +2005,13 @@ bool System::saveRequests() {
     }
 
     for (Request request : requests) {
-        file << request.getRequester()->getId() << ","
-             << request.getHouse()->getId() << ","
-             << request.getStartingDate().toString() << ","
-             << request.getEndingDate().toString() << ","
-             << request.getStatus() << newl;
+        file
+            << request.getId() << ","
+            << request.getRequester()->getId() << ","
+            << request.getHouse()->getId() << ","
+            << request.getStartingDate().toString() << ","
+            << request.getEndingDate().toString() << ","
+            << request.getStatus() << newl;
     }
 
     file.close();
@@ -1883,6 +2132,7 @@ void System::showUserProfile() {
     logInfo("Username: " << Colors::GREEN << currentMember->getUsername());
     logInfo("Full name: " << Colors::GREEN << currentMember->getFullName());
     logInfo("Phone: " << Colors::GREEN << currentMember->getPhone());
+    logInfo("Credit points: " << Colors::GREEN << currentMember->getCreditPoints());
 }
 
 void System::showUserHouseDetails() {
@@ -2047,5 +2297,49 @@ bool System::unlistCurrentHouse() {
 
     // Couldn't find house in houses list
     return false;
+}
+
+void System::getRequests(vector<Request*>& buffer, House* house) {
+    for (int i = 0; i < requests.size(); i++) {
+        skipLine();
+
+        if (requests[i].getHouse()->getId().compare(house->getId()) == 0 &&
+            requests[i].getStatus() == PENDING)
+            buffer.push_back(&requests[i]);
+    }
+}
+
+bool System::addPoints(Member* member, int points) {
+    if (member == nullptr) {
+        logError("Member not found.");
+        return false;
+    }
+
+    int newPoints = member->getCreditPoints() + points;
+    if (newPoints < 0) {
+        logError("You don't have enough credit points.");
+        return false;
+    }
+
+    member->setCreditPoints(newPoints);
+
+    return true;
+}
+
+bool System::removePoints(Member* member, int points) {
+    if (member == nullptr) {
+        logError("Member not found.");
+        return false;
+    }
+
+    int newPoints = member->getCreditPoints() - points;
+    if (newPoints < 0) {
+        logError("You don't have enough credit points.");
+        return false;
+    }
+
+    member->setCreditPoints(newPoints);
+
+    return true;
 }
 }  // namespace HouseExchanger

@@ -342,18 +342,17 @@ void houseDetailsLoop() {
                 break;
 
             case 2:
-                // "View requests",
+                currentHouse->viewRequests();
+
+                skipLine();
+                std::system("PAUSE");
                 break;
 
             case 3:
-                // "View comments",
-                break;
-
-            case 4:
                 // "View ratings",
                 break;
 
-            case 5:
+            case 4:
                 if (system->unlistCurrentHouse()) return;
                 break;
 
