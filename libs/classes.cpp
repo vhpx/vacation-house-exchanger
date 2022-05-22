@@ -1182,6 +1182,8 @@ void System::displayHouseBrowser(bool eligibleOnly, string location, Date starti
             log(Colors::BLUE << Colors::BOLD
                              << "\t\tHouse " + std::to_string(i + 1)
                              << Colors::RESET << newl);
+            if (isUserAdmin)
+                logInfo("ID: " << Colors::GREEN << houses[i].getId());
 
             logInfo("Location: " << Colors::GREEN << houses[i].getLocation());
             logInfo("Description: " << Colors::GREEN << houses[i].getDescription());
