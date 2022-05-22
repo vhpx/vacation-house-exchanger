@@ -62,36 +62,22 @@ string getFilePath(const string& fileName) {
 // UUID generator source:
 // https://stackoverflow.com/a/60198074/18811079
 namespace uuid {
-static std::random_device rd;
-static std::mt19937 gen(rd());
-static std::uniform_int_distribution<> dis(0, 15);
-static std::uniform_int_distribution<> dis2(8, 11);
+string generate_uuid_v4() {
+    static std::random_device dev;
+    static std::mt19937 rng(dev());
 
-std::string generate_uuid_v4() {
-    std::stringstream ss;
-    ss << std::hex;
+    std::uniform_int_distribution<int> dist(0, 15);
 
-    for (int i = 0; i < 8; i++)
-        ss << dis(gen);
-    ss << "-";
+    const char* v = "0123456789abcdef";
+    const bool dash[] = {0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0};
 
-    for (int i = 0; i < 4; i++)
-        ss << dis(gen);
-    ss << "-4";
-
-    for (int i = 0; i < 3; i++)
-        ss << dis(gen);
-    ss << "-";
-    ss << dis2(gen);
-
-    for (int i = 0; i < 3; i++)
-        ss << dis(gen);
-
-    ss << "-";
-    for (int i = 0; i < 12; i++)
-        ss << dis(gen);
-
-    return ss.str();
+    string res;
+    for (int i = 0; i < 16; i++) {
+        if (dash[i]) res += "-";
+        res += v[dist(rng)];
+        res += v[dist(rng)];
+    }
+    return res;
 }
 }  // namespace uuid
 
