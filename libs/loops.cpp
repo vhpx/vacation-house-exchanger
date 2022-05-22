@@ -44,9 +44,15 @@ void mainLoop() {
     while (choice != 0) {
         // User authentication status
         bool isLoggedIn = system->isLoggedIn();
+        bool isAdmin = system->isAdmin();
 
-        // Display the default menu
-        displayDefaultMenu();
+        if (isAdmin) {
+            // Display the admin menu
+            displayAdminMenu();
+        } else {
+            // Display the default menu
+            displayDefaultMenu();
+        }
 
         // Get user choice.
         illogInfo("Enter your choice: ");
@@ -77,7 +83,36 @@ void mainLoop() {
         // Process user choice.
         bool skipPause = false;
 
-        if (isLoggedIn) {
+        if (isAdmin) {
+            //* User is logged in as admin
+            switch (choice) {
+                case 1:
+                    system->displayMemberBrowser();
+                    break;
+
+                case 2:
+                    system->displayHouseBrowser(false, "", Date(), Date());
+                    break;
+
+                case 3:
+                    system->logout();
+                    break;
+
+                case 0:
+                    // Exit program
+                    break;
+
+                default:
+                    logError("Error: Invalid choice!");
+                    choice = -1;
+                    break;
+            }
+
+            // Exit the loop if the user
+            // wishes to quit the program.
+            if (choice == 0)
+                break;
+        } else if (isLoggedIn) {
             //* User is logged in.
             Member *member = system->getCurrentMember();
 
@@ -399,16 +434,46 @@ void houseSelectorLoop(bool eligibleOnly, string location, Date startingDate, Da
 
                 // Get available houses.
                 vector<House *> houses;
-                system->getAvailableHouses(houses, false, location, startingDate, endingDate);
+                system->getAvailableHouses(houses, true, location, startingDate, endingDate);
+
+                // Check if the house exists.
+                if (houseNumber < 1 || houseNumber > houses.size()) {
+                    logError("Error: Invalid house number!");
+                    break;
+                }
 
                 // Get house at [number - 1] index.
                 House *house = houses[houseNumber - 1];
 
                 // Check if the user is eligible to book the house.
                 if (currentUser->isEligibleToBook(house, startingDate, endingDate)) {
-                    // Book the house.
-                    // currentUser->bookHouse(house);
-                    logInfo("Successfully booked the house!");
+                    log(DIVIDER);
+                    log(Colors::BLUE << Colors::BOLD
+                                     << "\tSelected house details"
+                                     << Colors::RESET << newl);
+
+                    // Display house info.
+                    logInfo("House location: " << Colors::GREEN << house->getLocation());
+                    logInfo("House description: " << Colors::GREEN << house->getDescription());
+                    logInfo("Rental price: " << Colors::GREEN << Date::getDurationInDays(startingDate, endingDate) * house->getConsumptionPts());
+                    skipLine();
+
+                    // Confirm the user wants to book the house.
+                    string response;
+                    illogInfo("Are you sure you want to book this house? (Y/N): ");
+                    input(response);
+
+                    if (response == "N" || response == "n") {
+                        skipLine();
+                        break;
+                    }
+
+                    if (response == "Y" || response == "y") {
+                        currentUser->bookHouse(house, startingDate, endingDate);
+                    } else {
+                        // Invalid response.
+                        logError("Error: Invalid response!");
+                    }
                 } else {
                     logError("Error: You are not eligible to book this house.");
                 }

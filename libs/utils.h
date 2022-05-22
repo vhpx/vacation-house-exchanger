@@ -15,6 +15,7 @@ void displayMenuOptions(std::vector<std::string>& options);
 
 //* Menus
 void displayDefaultMenu();
+void displayAdminMenu();
 void displayProfileMenu();
 void displayHouseDetailsMenu();
 void displayHouseBrowserMenu();

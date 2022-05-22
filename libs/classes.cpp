@@ -618,6 +618,10 @@ void Member::setCreditPoints(int creditPoints) {
     this->creditPoints = creditPoints;
 }
 
+void Member::setRequest(Request* request) {
+    this->request = request;
+}
+
 // Getters
 string Member::getId() {
     return this->id;
@@ -645,6 +649,10 @@ int Member::getCreditPoints() {
 
 House* Member::getHouse() {
     return this->house;
+}
+
+Request* Member::getRequest() {
+    return this->request;
 }
 
 bool Member::listHouse() {
@@ -751,7 +759,7 @@ void Member::viewHouseDetail(House* house) {
     logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
 }
 
-bool Member::isEligibleToBook(House* house, Date staringDate, Date endingDate) {
+bool Member::isEligibleToBook(House* house, Date startingDate, Date endingDate) {
     // Check if the house already has an occupant.
     if (house->isOccupied()) {
         logError("House is already occupied.");
@@ -759,18 +767,41 @@ bool Member::isEligibleToBook(House* house, Date staringDate, Date endingDate) {
     }
 
     // Check if the house is available.
-    if (!house->isAvailable(staringDate, endingDate)) {
+    if (!house->isAvailable(startingDate, endingDate)) {
         logError("House is not available.");
         return false;
     }
 
     // Check if the member has enough credit points.
-    if (this->getCreditPoints() < Date::getDurationInDays(staringDate, endingDate) * house->getConsumptionPts()) {
+    if (this->getCreditPoints() < Date::getDurationInDays(startingDate, endingDate) * house->getConsumptionPts()) {
         logError("You don't have enough credit points.");
         return false;
     }
 
     return true;
+}
+
+bool Member::bookHouse(House* house, Date startingDate, Date endingDate) {
+    // Create a new request
+    Request request;
+
+    // Set request data.
+    request.setRequester(this);
+    request.setHouse(house);
+    request.setStartingDate(startingDate);
+    request.setEndingDate(endingDate);
+
+    // Add a new request to the system.
+    Request* newRequest = System::getInstance()->addRequest(request);
+
+    // Check if the request was added successfully.
+    if (newRequest != nullptr) {
+        logSuccess("Request added successfully.");
+        return true;
+    } else {
+        logError("Request failed.");
+        return false;
+    }
 }
 
 //* Rating class
@@ -834,6 +865,14 @@ void Request::setRequester(Member* requester) {
     this->requester = requester;
 }
 
+void Request::setStartingDate(Date startingDate) {
+    this->startingDate = startingDate;
+}
+
+void Request::setEndingDate(Date endingDate) {
+    this->endingDate = endingDate;
+}
+
 void Request::setStatus(int status) {
     this->status = status;
 }
@@ -849,6 +888,14 @@ House* Request::getHouse() {
 
 Member* Request::getRequester() {
     return this->requester;
+}
+
+Date Request::getStartingDate() {
+    return this->startingDate;
+}
+
+Date Request::getEndingDate() {
+    return this->endingDate;
 }
 
 int Request::getStatus() {
@@ -963,6 +1010,24 @@ Member* System::signUp(Member member) {
 Member* System::login(string username, string password) {
     skipLine();
 
+    // Check if the user is trying to login as an admin.
+    if (username.compare(adminUsername) == 0) {
+        if (password.compare(adminPassword) == 0) {
+            // Update current user
+            setCurrentMember(nullptr);
+            setIsLoggedIn(true);
+            setIsAdmin(true);
+
+            // Display success message
+            logSuccess("Logged in as an admin.");
+
+            return nullptr;
+        } else {
+            logError("Incorrect password.");
+            return nullptr;
+        }
+    }
+
     // Check if username exists
     for (int i = 0; i < members.size(); i++) {
         if (members[i].getUsername().compare(username) == 0) {
@@ -1074,10 +1139,9 @@ void System::getAvailableHouses(vector<House*>& buffer, bool eligibleOnly, strin
         if (eligibleOnly && houses[i].getLocation().compare(location) != 0)
             continue;
 
-        if (eligibleOnly && Date::compare(startingDate, houses[i].getListingStart()) < 0)
-            continue;
-
-        if (eligibleOnly && Date::compare(endingDate, houses[i].getListingEnd()) > 0)
+        if (eligibleOnly &&
+            (Date::compare(startingDate, houses[i].getListingStart()) < 0 ||
+             Date::compare(endingDate, houses[i].getListingEnd()) > 0))
             continue;
 
         if (eligibleOnly && houses[i].getOwner() == currentMember)
@@ -1121,7 +1185,7 @@ void System::displayHouseBrowser(bool eligibleOnly, string location, Date starti
             logInfo("Location: " << Colors::GREEN << availableHouses[i]->getLocation());
             logInfo("Description: " << Colors::GREEN << availableHouses[i]->getDescription());
             logInfo("Available from: " << Colors::GREEN << availableHouses[i]->getListingStart().toDateString());
-            logInfo("Until: " << Colors::GREEN << availableHouses[i]->getListingEnd().toDateString());
+            logInfo("Available until: " << Colors::GREEN << availableHouses[i]->getListingEnd().toDateString());
             logInfo("Consumption points (per day): " << Colors::GREEN << std::to_string(availableHouses[i]->getConsumptionPts()));
             logInfo("Expected consumption points: " << Colors::GREEN
                                                     << days * availableHouses[i]->getConsumptionPts());
@@ -1141,12 +1205,58 @@ void System::displayHouseBrowser(bool eligibleOnly, string location, Date starti
                 logInfo("Listing end: " << Colors::GREEN << houses[i].getListingEnd().toDateString());
                 logInfo("Consumption points (per day): " << Colors::GREEN << std::to_string(houses[i].getConsumptionPts()));
             }
+
+            if (isUserAdmin) {
+                skipLine();
+                logInfo("Owner ID: " << Colors::GREEN << houses[i].getOwner()->getId());
+                logInfo("Owner Username: " << Colors::GREEN << houses[i].getOwner()->getUsername());
+                logInfo("Owner Name: " << Colors::GREEN << houses[i].getOwner()->getFullName());
+            }
         }
+    }
+}
+
+void System::displayMemberBrowser() {
+    log(Colors::BLUE << Colors::BOLD << "\t     "
+                     << "Member Browser"
+                     << Colors::RESET << newl);
+
+    if (members.size() == 0) {
+        skipLine();
+        logInfo("There are no members on our system.");
+        return;
+    }
+
+    if (!isUserAdmin) {
+        skipLine();
+        logInfo("You must be an admin to view member profiles.");
+        return;
+    }
+
+    for (int i = 0; i < members.size(); i++) {
+        log(DIVIDER);
+        log(Colors::BLUE << Colors::BOLD
+                         << "\t\tMember " + std::to_string(i + 1)
+                         << Colors::RESET << newl);
+
+        logInfo("ID: " << Colors::GREEN << members[i].getId());
+        logInfo("Username: " << Colors::GREEN << members[i].getUsername());
+        logInfo("Name: " << Colors::GREEN << members[i].getFullName());
+        logInfo("Phone: " << Colors::GREEN << members[i].getPhone());
+        logInfo("Credit points: " << Colors::GREEN << members[i].getCreditPoints());
     }
 }
 
 // Resouce management methods
 Member* System::addMember(Member member, string id) {
+    // Check if system is trying to add a member
+    // with admin username.
+    if (member.getUsername().compare(adminUsername) == 0) {
+        skipLine();
+        logError("Username already taken.");
+        return nullptr;
+    }
+
     // Check if username is already taken
     for (int i = 0; i < members.size(); i++) {
         if (members[i].getUsername() == member.getUsername()) {
@@ -1173,7 +1283,14 @@ House* System::addHouse(House house, string id) {
     // Generate house ID if not provided
     if (id.empty()) {
         string id = generateId();
-        house.setId(id);
+
+        // Add house to houses vector
+        houses.push_back(house);
+
+        House* newHouse = &houses.back();
+        newHouse->setId(id);
+
+        return newHouse;
     } else {
         // Check if house already exists
         // if it does, update the house
@@ -1185,47 +1302,101 @@ House* System::addHouse(House house, string id) {
                 return &houses[i];
             }
         }
-    }
 
-    // Add house to houses vector
-    houses.push_back(house);
-    return &houses.back();
+        return nullptr;
+    }
 }
 
 Rating* System::addRating(Rating rating, string id) {
-    // Generate rating ID
+    // Generate rating ID if not provided
     if (id.empty()) {
         string id = generateId();
-        rating.setId(id);
-    }
 
-    // Add rating to ratings vector
-    ratings.push_back(rating);
-    return &ratings.back();
+        // Add rating to ratings vector
+        ratings.push_back(rating);
+
+        Rating* newRating = &ratings.back();
+        newRating->setId(id);
+
+        return newRating;
+    } else {
+        // Check if rating already exists
+        // if it does, update the rating
+        for (int i = 0; i < ratings.size(); i++) {
+            if (ratings[i].getId() == id) {
+                ratings[i] = rating;
+                ratings[i].setId(id);
+
+                return &ratings[i];
+            }
+        }
+
+        return nullptr;
+    }
 }
 
 Comment* System::addComment(Comment comment, string id) {
-    // Generate comment ID
+    // Generate comment ID if not provided
     if (id.empty()) {
         string id = generateId();
-        comment.setId(id);
-    }
 
-    // Add comment to comments vector
-    comments.push_back(comment);
-    return &comments.back();
+        // Add comment to comments vector
+        comments.push_back(comment);
+
+        Comment* newComment = &comments.back();
+        newComment->setId(id);
+
+        return newComment;
+    } else {
+        // Check if comment already exists
+        // if it does, update the comment
+        for (int i = 0; i < comments.size(); i++) {
+            if (comments[i].getId() == id) {
+                comments[i] = comment;
+                comments[i].setId(id);
+
+                return &comments[i];
+            }
+        }
+
+        return nullptr;
+    }
 }
 
 Request* System::addRequest(Request request, string id) {
-    // Generate request ID
+    // Generate request ID if not provided
     if (id.empty()) {
-        string id = generateId();
-        request.setId(id);
-    }
+        // Check if the current user has any request.
+        // If they do, return nullptr.
+        if (currentMember->getRequest() != nullptr) {
+            skipLine();
+            illogError("You already have a request.");
+            return nullptr;
+        }
 
-    // Add request to requests vector
-    requests.push_back(request);
-    return &requests.back();
+        string id = generateId();
+
+        // Add request to requests vector
+        requests.push_back(request);
+
+        Request* newRequest = &requests.back();
+        newRequest->setId(id);
+
+        return newRequest;
+    } else {
+        // Check if request already exists
+        // if it does, update the request
+        for (int i = 0; i < requests.size(); i++) {
+            if (requests[i].getId() == id) {
+                requests[i] = request;
+                requests[i].setId(id);
+
+                return &requests[i];
+            }
+        }
+
+        return nullptr;
+    }
 }
 
 bool System::loadMembers() {
@@ -1444,18 +1615,40 @@ bool System::loadRequests() {
             tokens.push_back(item);
         }
 
-        if (tokens.size() != 3) {
+        if (tokens.size() != 5) {
             notify("Error: Invalid Request format.", Colors::RED);
             continue;
         }
 
         Request request;
 
-        // request.setHouse(tokens[1]);
-        // request.setRequester(tokens[2]);
-        // request.setContent(tokens[3]);
+        System* system = System::getInstance();
+        House house;
+
+        string requesterId = tokens[0];
+        Member* requester = system->getMember(requesterId);
+
+        if (requester == nullptr) {
+            notify("Error: Owner with ID " + requesterId + " not found.");
+            continue;
+        }
+
+        string houseId = tokens[1];
+        House* requestedHouse = system->getHouse(houseId);
+
+        if (requestedHouse == nullptr) {
+            notify("Error: House with ID " + houseId + " not found.");
+            continue;
+        }
+
+        request.setRequester(requester);
+        request.setHouse(requestedHouse);
+        request.setStartingDate(Date::parse(tokens[2]));
+        request.setEndingDate(Date::parse(tokens[3]));
+        request.setStatus(std::stoi(tokens[4]));
 
         requests.push_back(request);
+        requester->setRequest(&requests.back());
     }
 
     file.close();
@@ -1577,7 +1770,11 @@ bool System::saveRequests() {
     }
 
     for (Request request : requests) {
-        file << request.getHouse() << "," << request.getRequester() << newl;
+        file << request.getRequester()->getId() << ","
+             << request.getHouse()->getId() << ","
+             << request.getStartingDate().toString() << ","
+             << request.getEndingDate().toString() << ","
+             << request.getStatus() << newl;
     }
 
     file.close();
@@ -1677,7 +1874,7 @@ Member* System::getCurrentMember() {
 }
 
 bool System::isLoggedIn() {
-    return currentMember != nullptr;
+    return isUserLoggedIn || currentMember != nullptr;
 }
 
 bool System::isAdmin() {

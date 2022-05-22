@@ -138,6 +138,8 @@ class Member : public Guest {
     House* house = nullptr;
     int creditPoints = 500;
 
+    Request* request = nullptr;
+
    public:
     //* Default constructor
     Member();
@@ -165,6 +167,7 @@ class Member : public Guest {
     void setPhone(string phone);
     void setHouse(House* house);
     void setCreditPoints(int creditPoints);
+    void setRequest(Request* request);
 
     //* Getters
     string getId();
@@ -174,12 +177,14 @@ class Member : public Guest {
     string getPhone();
     House* getHouse();
     int getCreditPoints();
+    Request* getRequest();
 
     bool listHouse();
     bool unlistHouse();
 
     void viewHouseDetail(House* house);
     bool isEligibleToBook(House* house, Date staringDate, Date endingDate);
+    bool bookHouse(House* house, Date startingDate, Date endingDate);
 };
 
 class Rating {
@@ -212,6 +217,7 @@ class Rating {
 class Request {
    private:
     string id = "";
+
     House* house = nullptr;
     Member* requester = nullptr;
 
@@ -231,12 +237,16 @@ class Request {
     void setId(string id);
     void setHouse(House* house);
     void setRequester(Member* requester);
+    void setStartingDate(Date startingDate);
+    void setEndingDate(Date endingDate);
     void setStatus(int status);
 
     // Getters
     string getId();
     House* getHouse();
     Member* getRequester();
+    Date getStartingDate();
+    Date getEndingDate();
     int getStatus();
 };
 
@@ -277,6 +287,9 @@ class System {
 
     // System data
     vector<string> availableLocations = {"Hanoi", "Saigon", "Da Nang"};
+
+    string adminUsername = "admin";
+    string adminPassword = "admin123";
 
     vector<Member> members;
     vector<House> houses;
@@ -321,6 +334,7 @@ class System {
 
     // Resouce management methods
     void getAvailableHouses(vector<House*>& buffer, bool eligibleOnly, string location, Date startingDate, Date endingDate);
+    void displayMemberBrowser();
     void displayHouseBrowser(bool eligibleOnly, string location, Date startingDate, Date endingDate);
 
     Member* addMember(Member member, string id = "");

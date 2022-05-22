@@ -85,15 +85,23 @@ void displayWelcomeMsg() {
 void displayAppHeader() {
     System* system = System::getInstance();
     bool isLoggedIn = system->isLoggedIn();
+    bool isAdmin = system->isAdmin();
 
     log(DIVIDER);
     logInfo(Colors::BOLD << "  " << APP_NAME);
 
     log(DIVIDER);
     if (isLoggedIn) {
-        logSuccess("\tLogged in as: "
-                   << Colors::YELLOW
-                   << system->getCurrentMember()->getUsername());
+        if (isAdmin) {
+            logSuccess("\tLogged in as: "
+                       << Colors::CYAN
+                       << "ADMIN");
+        } else {
+            logSuccess("\tLogged in as: "
+                       << Colors::YELLOW
+                       << system->getCurrentMember()->getUsername());
+        }
+
     } else {
         logError("\tYou are not logged in.");
     }
@@ -136,6 +144,57 @@ void displayDefaultMenu() {
 
         displayMenuOptions(options);
     }
+
+    logInfo(newl << Colors::BOLD << "[0] " << Colors::RED << "Exit program");
+
+    Member* currentMember = system->getCurrentMember();
+    if (!isAdmin && isLoggedIn && currentMember->getRequest() != nullptr) {
+        Request* request = currentMember->getRequest();
+        House* house = request->getHouse();
+
+        log(DIVIDER);
+        logInfo("You have a " << Colors::CYAN << "pending request" << Colors::YELLOW
+                              << " for a house in " << Colors::GREEN
+                              << house->getLocation() << Colors::YELLOW << ".");
+
+        logInfo("Your requested stay is from " << Colors::GREEN << request->getStartingDate().toDateString()
+                                               << Colors::YELLOW << " to " << Colors::GREEN
+                                               << request->getEndingDate().toDateString() << Colors::YELLOW << ".");
+    }
+
+    log(DIVIDER << newl);
+}
+
+void displayAdminMenu() {
+    System* system = System::getInstance();
+
+    bool isLoggedIn = system->isLoggedIn();
+    bool isAdmin = system->isAdmin();
+
+    if (!isLoggedIn) {
+        logError("You are not logged in.");
+        return;
+    }
+
+    if (!isAdmin) {
+        logError("You are not an admin.");
+        return;
+    }
+
+    displayAppHeader();
+
+    log(DIVIDER);
+    log(Colors::BLUE << Colors::BOLD
+                     << "\tPlease select an option"
+                     << Colors::RESET << newl);
+
+    std::vector<std::string> options = {
+        "View all members",
+        "View all houses",
+        "Logout",
+    };
+
+    displayMenuOptions(options);
 
     logInfo(newl << Colors::BOLD << "[0] " << Colors::RED << "Exit program");
     log(DIVIDER << newl);
@@ -219,7 +278,7 @@ void displayHouseSelectorMenu() {
                      << Colors::RESET << newl);
 
     std::vector<std::string> options = {
-        "Select house",
+        "Request to occupy a house",
     };
 
     displayMenuOptions(options);
