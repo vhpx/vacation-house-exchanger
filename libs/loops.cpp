@@ -1,6 +1,7 @@
 #include "loops.h"
 
 #include <iostream>
+#include <string>
 
 #include "classes.h"
 #include "colors.h"
@@ -133,8 +134,66 @@ void mainLoop() {
                     break;
 
                 case 4:
-                    member->logout();
+                    member->viewRatings();
                     break;
+
+                case 5:
+                    if (system->getCurrentMember()->getRequest() != nullptr && system->getCurrentMember()->getRequest()->getStatus() == APPROVED) {
+                        int score;
+                        string comment;
+
+                        // Ask for score
+                        illogInfo("How would you rate your experience? (-10 to 10): ");
+
+                        string buffer;
+                        input(buffer);
+
+                        // Check if the user entered an integer.
+                        if (checkIfInteger(buffer)) {
+                            score = std::stoi(buffer);
+
+                            // Check if the score is out of the range
+                            if (score < -10 || score > 10) {
+                                logError("Error: Invalid score. Please enter a number between -10 and 10.");
+                                break;
+                            }
+                        } else {
+                            logError("Error: Invalid input. Please enter an integer.");
+                        }
+
+                        // Ask for comment
+                        illogInfo("Enter your comment: ");
+
+                        if (std::cin.peek() == '\n') std::cin.ignore();
+                        inputStr(comment);
+
+                        // Check if the comment is empty
+                        if (comment.empty()) {
+                            logError("Error: Invalid comment. Please enter a comment.");
+                            break;
+                        }
+
+                        // Add new rating
+                        Rating rating;
+
+                        rating.setAuthor(system->getCurrentMember());
+                        rating.setHouse(system->getCurrentMember()->getRequest()->getHouse());
+
+                        rating.setScore(score);
+                        rating.setComment(comment);
+
+                        skipLine();
+                        logSuccess("Rating added successfully.");
+
+                        system->addRating(rating);
+                    } else {
+                        member->logout();
+                    }
+                    break;
+
+                case 6:
+                    if (system->getCurrentMember()->getRequest() != nullptr && system->getCurrentMember()->getRequest()->getStatus() == APPROVED)
+                        member->logout();
 
                 case 0:
                     // Exit program
@@ -349,12 +408,70 @@ void houseDetailsLoop() {
                 break;
 
             case 3:
-                // "View ratings",
+                currentHouse->viewRatings();
+
+                skipLine();
+                std::system("PAUSE");
                 break;
 
             case 4:
-                if (system->unlistCurrentHouse()) return;
+                if (currentHouse->getOccupier() != nullptr) {
+                    int score;
+                    string comment;
+
+                    // Ask for score
+                    illogInfo("How would you rate the occupier? (-10 to 10): ");
+
+                    string buffer;
+                    input(buffer);
+
+                    // Check if the user entered an integer.
+                    if (checkIfInteger(buffer)) {
+                        score = std::stoi(buffer);
+
+                        // Check if the score is out of the range
+                        if (score < -10 || score > 10) {
+                            logError("Error: Invalid score. Please enter a number between -10 and 10.");
+                            break;
+                        }
+                    } else {
+                        logError("Error: Invalid input. Please enter an integer.");
+                    }
+
+                    // Ask for comment
+                    illogInfo("Enter your comment: ");
+
+                    if (std::cin.peek() == '\n') std::cin.ignore();
+                    inputStr(comment);
+
+                    // Check if the comment is empty
+                    if (comment.empty()) {
+                        logError("Error: Invalid comment. Please enter a comment.");
+                        break;
+                    }
+
+                    // Add new rating
+                    Rating rating;
+                    rating.setTarget(currentHouse->getOccupier());
+
+                    rating.setAuthor(system->getCurrentMember());
+                    rating.setHouse(system->getCurrentMember()->getHouse());
+
+                    rating.setScore(score);
+                    rating.setComment(comment);
+
+                    skipLine();
+                    logSuccess("Rating added successfully.");
+
+                    system->addRating(rating);
+                } else if (system->unlistCurrentHouse())
+                    return;
                 break;
+
+            case 5:
+                if (currentHouse->getOccupier() != nullptr)
+                    if (system->unlistCurrentHouse())
+                        return;
 
             case 0:
                 // Exit house details loop

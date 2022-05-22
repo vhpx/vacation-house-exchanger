@@ -19,7 +19,6 @@ enum RequestStatus {
 class Member;
 class House;
 class Rating;
-class Comment;
 class Request;
 
 class Date {
@@ -193,14 +192,17 @@ class Member : public Guest {
     void viewHouseDetail(House* house);
     bool isEligibleToBook(House* house, Date staringDate, Date endingDate);
     bool bookHouse(House* house, Date startingDate, Date endingDate);
+    void viewRatings();
 };
 
 class Rating {
    private:
-    string id = "";
     House* house = nullptr;
     Member* author = nullptr;
-    string content = "";
+    Member* target = nullptr;
+
+    int score = 0;
+    string comment = "";
 
    public:
     // Default constructor
@@ -210,16 +212,18 @@ class Rating {
     ~Rating();
 
     // Setters
-    void setId(string id);
     void setHouse(House* house);
     void setAuthor(Member* author);
-    void setContent(string content);
+    void setTarget(Member* target);
+    void setScore(int score);
+    void setComment(string comment);
 
     // Getters
-    string getId();
     House* getHouse();
     Member* getAuthor();
-    string getContent();
+    Member* getTarget();
+    int getScore();
+    string getComment();
 };
 
 class Request {
@@ -258,33 +262,6 @@ class Request {
     int getStatus();
 };
 
-class Comment {
-   private:
-    string id = "";
-    House* house = nullptr;
-    Member* author = nullptr;
-    string content = "";
-
-   public:
-    // Default constructor
-    Comment();
-
-    // Destructor
-    ~Comment();
-
-    // Setters
-    void setId(string id);
-    void setHouse(House* house);
-    void setAuthor(Member* author);
-    void setContent(string content);
-
-    // Getters
-    string getId();
-    House* getHouse();
-    Member* getAuthor();
-    string getContent();
-};
-
 class System {
    private:
     // Singleton instance
@@ -302,7 +279,6 @@ class System {
     vector<Member> members;
     vector<House> houses;
     vector<Rating> ratings;
-    vector<Comment> comments;
     vector<Request> requests;
 
     // Current user data
@@ -343,13 +319,14 @@ class System {
     // Resouce management methods
     void getAvailableHouses(vector<House*>& buffer, bool eligibleOnly, string location, Date startingDate, Date endingDate);
     void getRequests(vector<Request*>& buffer, House* house);
+    void getRatings(vector<Rating*>& buffer, House* house);
+    void getRatings(vector<Rating*>& buffer, Member* member);
     void displayMemberBrowser();
     void displayHouseBrowser(bool eligibleOnly, string location, Date startingDate, Date endingDate);
 
     Member* addMember(Member member, string id = "");
     House* addHouse(House house, string id = "");
-    Rating* addRating(Rating rating, string id = "");
-    Comment* addComment(Comment comment, string id = "");
+    Rating* addRating(Rating rating);
     Request* addRequest(Request request, string id = "");
 
     bool addPoints(Member* member, int points);
@@ -357,22 +334,19 @@ class System {
 
     Member* getMember(string id);
     House* getHouse(string id);
-    Rating* getRating(string id);
-    Comment* getComment(string id);
+    Rating* getRating(string houseId, string authorId);
     Request* getRequest(string id);
 
     // Loading methods
     bool loadMembers();
     bool loadHouses();
     bool loadRatings();
-    bool loadComments();
     bool loadRequests();
 
     // Saving methods
     bool saveMembers();
     bool saveHouses();
     bool saveRatings();
-    bool saveComments();
     bool saveRequests();
 
     // System control methods

@@ -20,7 +20,6 @@ const string DATA_PATH = "data/";
 const string MEMBERS_FILE = "members.dat";
 const string HOUSES_FILE = "houses.dat";
 const string RATINGS_FILE = "ratings.dat";
-const string COMMENTS_FILE = "comments.dat";
 const string REQUESTS_FILE = "requests.dat";
 
 //* Helper preprocessor macros
@@ -504,6 +503,16 @@ void House::viewRequests() {
                 // Check if the user entered an integer.
                 if (checkIfInteger(buffer)) {
                     requestIndex = std::stoi(buffer) - 1;
+
+                    if (requestIndex < 0 || requestIndex >= requests.size()) {
+                        logError("Error: Invalid input. Please enter a valid request number.");
+
+                        // Wait for user to press enter.
+                        skipLine();
+                        std::system("PAUSE");  // Only works on Windows.
+
+                        continue;
+                    }
                 } else {
                     logError("Error: Invalid input. Please enter an integer.");
 
@@ -650,7 +659,31 @@ bool House::denyRequest(Request* request) {
     return true;
 }
 
-void House::viewRatings() {}
+void House::viewRatings() {
+    System* system = System::getInstance();
+    vector<Rating*> ratings;
+
+    system->getRatings(ratings, this);
+
+    if (ratings.size() == 0) {
+        logInfo("No ratings have been made for this house.");
+
+        return;
+    }
+
+    for (int i = 0; i < ratings.size(); i++) {
+        log(Colors::BLUE << Colors::BOLD
+                         << "\t\tRating #" + std::to_string(i + 1)
+                         << Colors::RESET << newl);
+
+        logInfo("Rated by: " << Colors::GREEN << ratings[i]->getAuthor()->getFullName());
+        logInfo("Score: " << Colors::GREEN << ratings[i]->getScore());
+        logInfo("Comment: " << Colors::GREEN << ratings[i]->getComment());
+
+        skipLine();
+        log(DIVIDER);
+    }
+}
 
 //* Guest class
 // Default constructor
@@ -1031,6 +1064,32 @@ bool Member::bookHouse(House* house, Date startingDate, Date endingDate) {
     }
 }
 
+void Member::viewRatings() {
+    System* system = System::getInstance();
+    vector<Rating*> ratings;
+
+    system->getRatings(ratings, this);
+
+    if (ratings.size() == 0) {
+        logInfo("No ratings found.");
+
+        return;
+    }
+
+    for (int i = 0; i < ratings.size(); i++) {
+        log(Colors::BLUE << Colors::BOLD
+                         << "\t\tRating #" + std::to_string(i + 1)
+                         << Colors::RESET << newl);
+
+        logInfo("Rated by: " << Colors::GREEN << ratings[i]->getAuthor()->getFullName());
+        logInfo("Score: " << Colors::GREEN << ratings[i]->getScore());
+        logInfo("Comment: " << Colors::GREEN << ratings[i]->getComment());
+
+        skipLine();
+        log(DIVIDER);
+    }
+}
+
 //* Rating class
 // Default constructor
 Rating::Rating() {}
@@ -1039,10 +1098,6 @@ Rating::Rating() {}
 Rating::~Rating() {}
 
 // Setters
-void Rating::setId(string id) {
-    this->id = id;
-}
-
 void Rating::setHouse(House* house) {
     this->house = house;
 }
@@ -1051,15 +1106,19 @@ void Rating::setAuthor(Member* author) {
     this->author = author;
 }
 
-void Rating::setContent(string content) {
-    this->content = content;
+void Rating::setTarget(Member* target) {
+    this->target = target;
+}
+
+void Rating::setScore(int score) {
+    this->score = score;
+}
+
+void Rating::setComment(string comment) {
+    this->comment = comment;
 }
 
 // Getters
-string Rating::getId() {
-    return this->id;
-}
-
 House* Rating::getHouse() {
     return this->house;
 }
@@ -1068,8 +1127,16 @@ Member* Rating::getAuthor() {
     return this->author;
 }
 
-string Rating::getContent() {
-    return this->content;
+Member* Rating::getTarget() {
+    return this->target;
+}
+
+int Rating::getScore() {
+    return this->score;
+}
+
+string Rating::getComment() {
+    return this->comment;
 }
 
 //* Request class
@@ -1127,47 +1194,6 @@ Date Request::getEndingDate() {
 
 int Request::getStatus() {
     return this->status;
-}
-
-//* Comment class
-// Default constructor
-Comment::Comment() {}
-
-// Destructor
-Comment::~Comment() {}
-
-// Setters
-void Comment::setId(string id) {
-    this->id = id;
-}
-
-void Comment::setHouse(House* house) {
-    this->house = house;
-}
-
-void Comment::setAuthor(Member* author) {
-    this->author = author;
-}
-
-void Comment::setContent(string content) {
-    this->content = content;
-}
-
-// Getters
-string Comment::getId() {
-    return this->id;
-}
-
-House* Comment::getHouse() {
-    return this->house;
-}
-
-Member* Comment::getAuthor() {
-    return this->author;
-}
-
-string Comment::getContent() {
-    return this->content;
 }
 
 //* System class
@@ -1263,6 +1289,15 @@ Member* System::login(string username, string password) {
                 // Update current member
                 setCurrentMember(&members[i]);
                 setIsLoggedIn(true);
+
+                // Update current occupant
+                if (members[i].getHouse() != nullptr) {
+                    for (Request& request : requests) {
+                        if (request.getHouse()->getOwner()->getId() == members[i].getId() && request.getStatus() == APPROVED) {
+                            members[i].getHouse()->setOccupier(request.getRequester());
+                        }
+                    }
+                }
 
                 // Display success message
                 logSuccess("Login successful.");
@@ -1406,7 +1441,7 @@ void System::displayHouseBrowser(bool eligibleOnly, string location, Date starti
         for (int i = 0; i < availableHouses.size(); i++) {
             log(DIVIDER);
             log(Colors::BLUE << Colors::BOLD
-                             << "\t\tHouse " + std::to_string(i + 1)
+                             << "\t\tHouse #" + std::to_string(i + 1)
                              << Colors::RESET << newl);
 
             logInfo("Location: " << Colors::GREEN << availableHouses[i]->getLocation());
@@ -1421,7 +1456,7 @@ void System::displayHouseBrowser(bool eligibleOnly, string location, Date starti
         for (int i = 0; i < houses.size(); i++) {
             log(DIVIDER);
             log(Colors::BLUE << Colors::BOLD
-                             << "\t\tHouse " + std::to_string(i + 1)
+                             << "\t\tHouse #" + std::to_string(i + 1)
                              << Colors::RESET << newl);
             if (isUserAdmin)
                 logInfo("ID: " << Colors::GREEN << houses[i].getId());
@@ -1536,60 +1571,22 @@ House* System::addHouse(House house, string id) {
     }
 }
 
-Rating* System::addRating(Rating rating, string id) {
-    // Generate rating ID if not provided
-    if (id.empty()) {
-        string id = generateId();
-
-        // Add rating to ratings vector
-        ratings.push_back(rating);
-
-        Rating* newRating = &ratings.back();
-        newRating->setId(id);
-
-        return newRating;
-    } else {
-        // Check if rating already exists
-        // if it does, update the rating
-        for (int i = 0; i < ratings.size(); i++) {
-            if (ratings[i].getId() == id) {
-                ratings[i] = rating;
-                ratings[i].setId(id);
-
-                return &ratings[i];
-            }
+Rating* System::addRating(Rating rating) {
+    // Check if rating already exists
+    // if it does, update the rating
+    for (int i = 0; i < ratings.size(); i++) {
+        if (ratings[i].getHouse()->getId() == rating.getHouse()->getId() &&
+            ratings[i].getAuthor()->getId() == rating.getAuthor()->getId()) {
+            ratings[i] = rating;
+            return &ratings[i];
         }
-
-        return nullptr;
     }
-}
 
-Comment* System::addComment(Comment comment, string id) {
-    // Generate comment ID if not provided
-    if (id.empty()) {
-        string id = generateId();
+    // Add rating to ratings vector
+    ratings.push_back(rating);
+    Rating* newRating = &ratings.back();
 
-        // Add comment to comments vector
-        comments.push_back(comment);
-
-        Comment* newComment = &comments.back();
-        newComment->setId(id);
-
-        return newComment;
-    } else {
-        // Check if comment already exists
-        // if it does, update the comment
-        for (int i = 0; i < comments.size(); i++) {
-            if (comments[i].getId() == id) {
-                comments[i] = comment;
-                comments[i].setId(id);
-
-                return &comments[i];
-            }
-        }
-
-        return nullptr;
-    }
+    return newRating;
 }
 
 Request* System::addRequest(Request request, string id) {
@@ -1723,7 +1720,9 @@ bool System::loadHouses() {
         house.setConsumptionPts(std::stoi(tokens[6]));
 
         houses.push_back(house);
-        owner->setHouse(&houses.back());
+        House* newHouse = &houses.back();
+
+        owner->setHouse(newHouse);
     }
 
     file.close();
@@ -1756,16 +1755,38 @@ bool System::loadRatings() {
             tokens.push_back(item);
         }
 
-        if (tokens.size() != 4) {
+        if (tokens.size() != 5) {
             notify("Error: Invalid Rating format.", Colors::RED);
             continue;
         }
 
         Rating rating;
 
-        // rating.setHouse(tokens[1]);
-        // rating.setAuthor(tokens[2]);
-        // rating.setContent(tokens[3]);
+        string houseId = tokens[0];
+        string authorId = tokens[1];
+        string targetId = tokens[2];
+        string scoreStr = tokens[3];
+        string comment = tokens[4];
+
+        House* house = getHouse(houseId);
+        Member* author = getMember(authorId);
+        Member* target = targetId.compare("none") == 0 ? nullptr : getMember(targetId);
+
+        if (house == nullptr) {
+            notify("Error: House with ID " + houseId + " not found.");
+            continue;
+        }
+
+        if (author == nullptr) {
+            notify("Error: Author with ID " + authorId + " not found.");
+            continue;
+        }
+
+        rating.setHouse(house);
+        rating.setAuthor(author);
+        rating.setTarget(target);
+        rating.setScore(stoi(scoreStr));
+        rating.setComment(comment);
 
         ratings.push_back(rating);
     }
@@ -1774,50 +1795,6 @@ bool System::loadRatings() {
 
     if (SHOW_PROCESSED_AMOUNT)
         notify("Loaded " + Colors::YELLOW + std::to_string(ratings.size()) + Colors::GREEN + " ratings.", Colors::GREEN);
-
-    return true;
-}
-
-bool System::loadComments() {
-    std::ifstream file;
-    string filePath = getFilePath(COMMENTS_FILE);
-
-    file.open(filePath, std::ios::in);
-
-    if (!file.is_open()) {
-        notify("Error: " + filePath + " not found.", Colors::RED);
-        return false;
-    }
-
-    std::string line;
-
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        std::string item;
-        std::vector<std::string> tokens;
-
-        while (std::getline(ss, item, ',')) {
-            tokens.push_back(item);
-        }
-
-        if (tokens.size() != 4) {
-            notify("Error: Invalid Comment format.", Colors::RED);
-            continue;
-        }
-
-        Comment comment;
-
-        // comment.setHouse(tokens[1]);
-        // comment.setAuthor(tokens[2]);
-        // comment.setContent(tokens[3]);
-
-        comments.push_back(comment);
-    }
-
-    file.close();
-
-    if (SHOW_PROCESSED_AMOUNT)
-        notify("Loaded " + Colors::YELLOW + std::to_string(comments.size()) + Colors::GREEN + " comments.", Colors::GREEN);
 
     return true;
 }
@@ -1849,10 +1826,7 @@ bool System::loadRequests() {
             continue;
         }
 
-        Request request;
-
         System* system = System::getInstance();
-        House house;
 
         string requesterId = tokens[1];
         Member* requester = system->getMember(requesterId);
@@ -1870,6 +1844,8 @@ bool System::loadRequests() {
             continue;
         }
 
+        Request request;
+
         request.setId(tokens[0]);
         request.setRequester(requester);
         request.setHouse(requestedHouse);
@@ -1882,8 +1858,15 @@ bool System::loadRequests() {
 
         requester->setRequest(newRequest);
 
-        if (newRequest->getStatus() == APPROVED)
-            newRequest->getHouse()->setOccupier(requester);
+        if (newRequest->getStatus() == APPROVED) {
+            // loop through all houses and find the one with the same id
+            for (House& house : houses) {
+                if (house.getId() == newRequest->getHouse()->getId()) {
+                    house.setOccupier(requester);
+                    break;
+                }
+            }
+        }
     }
 
     file.close();
@@ -1957,38 +1940,17 @@ bool System::saveRatings() {
     }
 
     for (Rating rating : ratings) {
-        file << rating.getHouse() << "," << rating.getAuthor()
-             << "," << rating.getContent() << newl;
+        file << rating.getHouse()->getId() << ","
+             << rating.getAuthor()->getId() << ","
+             << (rating.getTarget() != nullptr ? rating.getTarget()->getId() : "none") << ","
+             << rating.getScore() << ","
+             << rating.getComment() << newl;
     }
 
     file.close();
 
     if (SHOW_PROCESSED_AMOUNT)
         notify("Saved " + Colors::YELLOW + std::to_string(ratings.size()) + Colors::GREEN + " ratings.", Colors::GREEN);
-
-    return true;
-}
-
-bool System::saveComments() {
-    std::ofstream file;
-    string filePath = getFilePath(COMMENTS_FILE);
-
-    file.open(filePath, std::ios::out);
-
-    if (!file.is_open()) {
-        notify("Error: " + filePath + " not found.", Colors::RED);
-        return false;
-    }
-
-    for (Comment comment : comments) {
-        file << comment.getHouse() << "," << comment.getAuthor()
-             << "," << comment.getContent() << newl;
-    }
-
-    file.close();
-
-    if (SHOW_PROCESSED_AMOUNT)
-        notify("Saved " + Colors::YELLOW + std::to_string(comments.size()) + Colors::GREEN + " comments.", Colors::GREEN);
 
     return true;
 }
@@ -2044,11 +2006,6 @@ bool System::initialize() {
         return false;
     }
 
-    if (!loadComments()) {
-        notify("Failed to load Comments.", Colors::RED);
-        return false;
-    }
-
     if (!loadRequests()) {
         notify("Failed to load Requests.", Colors::RED);
         return false;
@@ -2079,11 +2036,6 @@ bool System::shutdown() {
 
     if (!saveRatings()) {
         notify("Failed to save ratings.", Colors::RED);
-        return false;
-    }
-
-    if (!saveComments()) {
-        notify("Failed to save comments.", Colors::RED);
         return false;
     }
 
@@ -2179,6 +2131,14 @@ void System::showUserHouseDetails() {
     logInfo("Listing start: " << Colors::GREEN << house->getListingStart().toDateString());
     logInfo("Listing end: " << Colors::GREEN << house->getListingEnd().toDateString());
     logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
+    skipLine();
+
+    if (house->getOccupier() != nullptr) {
+        logInfo("Occupier: " << Colors::GREEN << house->getOccupier()->getFullName());
+        logInfo("Occupier phone: " << Colors::GREEN << house->getOccupier()->getPhone());
+    } else {
+        logInfo("Occupier: " << Colors::GREEN << "None");
+    }
 }
 
 Member* System::getMember(string id) {
@@ -2199,19 +2159,10 @@ House* System::getHouse(string id) {
     return nullptr;
 }
 
-Rating* System::getRating(string id) {
+Rating* System::getRating(string houseId, string authorId) {
     for (Rating& rating : ratings) {
-        if (rating.getId() == id)
+        if (rating.getHouse()->getId() == houseId && rating.getAuthor()->getId() == authorId)
             return &rating;
-    }
-
-    return nullptr;
-}
-
-Comment* System::getComment(string id) {
-    for (Comment& comment : comments) {
-        if (comment.getId() == id)
-            return &comment;
     }
 
     return nullptr;
@@ -2341,5 +2292,23 @@ bool System::removePoints(Member* member, int points) {
     member->setCreditPoints(newPoints);
 
     return true;
+}
+
+void System::getRatings(vector<Rating*>& buffer, House* house) {
+    for (int i = 0; i < ratings.size(); i++) {
+        skipLine();
+
+        if (ratings[i].getTarget() == nullptr && ratings[i].getHouse()->getId().compare(house->getId()) == 0)
+            buffer.push_back(&ratings[i]);
+    }
+}
+
+void System::getRatings(vector<Rating*>& buffer, Member* member) {
+    for (int i = 0; i < ratings.size(); i++) {
+        skipLine();
+
+        if (ratings[i].getTarget() != nullptr && ratings[i].getTarget()->getId().compare(member->getId()) == 0)
+            buffer.push_back(&ratings[i]);
+    }
 }
 }  // namespace HouseExchanger

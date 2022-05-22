@@ -131,8 +131,15 @@ void displayDefaultMenu() {
             "Account profile",
             "House profile",
             "Browse houses",
+            "View my ratings",
             "Logout",
         };
+
+        if (system->getCurrentMember()->getRequest() != nullptr && system->getCurrentMember()->getRequest()->getStatus() == APPROVED) {
+            options.pop_back();
+            options.push_back("Rate exchanged house");
+            options.push_back("Logout");
+        }
 
         displayMenuOptions(options);
     } else {
@@ -154,16 +161,28 @@ void displayDefaultMenu() {
 
         log(DIVIDER);
 
-        if (currentMember->getRequest()->getStatus() == PENDING)
+        if (request->getStatus() == PENDING)
             logInfo("You have a " << Colors::CYAN << "pending request" << Colors::YELLOW
                                   << " for a house in " << Colors::GREEN
                                   << house->getLocation() << Colors::YELLOW << ".");
-        else if (currentMember->getRequest()->getStatus() == APPROVED)
+        else if (request->getStatus() == APPROVED) {
             logInfo("Your request for a house in " << Colors::GREEN
                                                    << house->getLocation() << Colors::YELLOW
                                                    << " has been " << Colors::GREEN
                                                    << "approved" << Colors::YELLOW << ".");
-        else if (currentMember->getRequest()->getStatus() == DENIED)
+
+            Rating* rating = system->getRating(house->getId(), currentMember->getId());
+
+            skipLine();
+            if (rating == nullptr) {
+                logInfo("You have not rated this house yet.");
+            } else {
+                logInfo("You have rated this house as " << Colors::GREEN
+                                                        << rating->getScore() << Colors::YELLOW << ".");
+                logInfo("With a comment: " << Colors::GREEN << rating->getComment() << Colors::YELLOW << ".");
+            }
+            skipLine();
+        } else if (request->getStatus() == DENIED)
             logInfo("Your request for a house in " << Colors::GREEN
                                                    << house->getLocation() << Colors::YELLOW
                                                    << " has been " << Colors::RED
@@ -256,6 +275,12 @@ void displayHouseDetailsMenu() {
         "View ratings",
         "Unlist house",
     };
+
+    if (system->getCurrentMember()->getHouse()->getOccupier() != nullptr) {
+        options.pop_back();
+        options.push_back("Rate occupier");
+        options.push_back("Unlist house");
+    }
 
     displayMenuOptions(options);
 
