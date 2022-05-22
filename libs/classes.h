@@ -74,7 +74,6 @@ class House {
     Date listingEnd;
 
     int consumptionPts = 0;  // points per day
-    vector<Rating*> ratings;
 
    public:
     //* Default constructor
@@ -106,6 +105,8 @@ class House {
     Date getListingEnd();
 
     int getConsumptionPts();
+    bool getHasRatings();
+    float getRating();
 
     //* Miscellaneous
     bool isOccupied();
@@ -182,9 +183,11 @@ class Member : public Guest {
     string getPassword();
     string getFullName();
     string getPhone();
+    bool getHasRatings();
     House* getHouse();
     int getCreditPoints();
     Request* getRequest();
+    float getRating();
 
     bool listHouse();
     bool unlistHouse();

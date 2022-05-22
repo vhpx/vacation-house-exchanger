@@ -399,6 +399,15 @@ int House::getConsumptionPts() {
     return this->consumptionPts;
 }
 
+bool House::getHasRatings() {
+    System* system = System::getInstance();
+    vector<Rating*> ratings;
+
+    system->getRatings(ratings, this);
+
+    return ratings.size() > 0;
+}
+
 bool House::isOccupied() {
     return occupier != nullptr;
 }
@@ -685,6 +694,25 @@ void House::viewRatings() {
     }
 }
 
+float House::getRating() {
+    System* system = System::getInstance();
+    vector<Rating*> ratings;
+
+    system->getRatings(ratings, this);
+
+    if (ratings.size() == 0) {
+        return 0;
+    }
+
+    float sum = 0;
+
+    for (int i = 0; i < ratings.size(); i++) {
+        sum += ratings[i]->getScore();
+    }
+
+    return sum / ratings.size();
+}
+
 //* Guest class
 // Default constructor
 Guest::Guest() {}
@@ -901,6 +929,15 @@ string Member::getPhone() {
     return this->phone;
 }
 
+bool Member::getHasRatings() {
+    System* system = System::getInstance();
+    vector<Rating*> ratings;
+
+    system->getRatings(ratings, this);
+
+    return ratings.size() > 0;
+}
+
 int Member::getCreditPoints() {
     return this->creditPoints;
 }
@@ -1088,6 +1125,25 @@ void Member::viewRatings() {
         skipLine();
         log(DIVIDER);
     }
+}
+
+float Member::getRating() {
+    System* system = System::getInstance();
+    vector<Rating*> ratings;
+
+    system->getRatings(ratings, this);
+
+    if (ratings.size() == 0) {
+        return 0;
+    }
+
+    float sum = 0;
+
+    for (int i = 0; i < ratings.size(); i++) {
+        sum += ratings[i]->getScore();
+    }
+
+    return sum / ratings.size();
 }
 
 //* Rating class
@@ -2084,7 +2140,17 @@ void System::showUserProfile() {
     logInfo("Username: " << Colors::GREEN << currentMember->getUsername());
     logInfo("Full name: " << Colors::GREEN << currentMember->getFullName());
     logInfo("Phone: " << Colors::GREEN << currentMember->getPhone());
-    logInfo("Credit points: " << Colors::GREEN << currentMember->getCreditPoints());
+    illogInfo("Credit points: " << Colors::GREEN << currentMember->getCreditPoints());
+
+    bool hasRatings = currentMember->getHasRatings();
+    if (hasRatings) {
+        float rating = currentMember->getRating();
+        logInfo("Rating: " << Colors::GREEN << std::fixed << std::setprecision(2) << rating);
+        skipLine();
+    } else {
+        skipLine();
+        logInfo(newl << "You have not been rated yet.");
+    }
 }
 
 void System::showUserHouseDetails() {
@@ -2130,8 +2196,16 @@ void System::showUserHouseDetails() {
     logInfo("Description: " << Colors::GREEN << house->getDescription());
     logInfo("Listing start: " << Colors::GREEN << house->getListingStart().toDateString());
     logInfo("Listing end: " << Colors::GREEN << house->getListingEnd().toDateString());
-    logInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
-    skipLine();
+    illogInfo("Consumption points: " << Colors::GREEN << house->getConsumptionPts());
+
+    bool hasRatings = house->getHasRatings();
+    if (hasRatings) {
+        float rating = house->getRating();
+        logInfo("House rating: " << Colors::GREEN << std::fixed << std::setprecision(2) << rating);
+    } else {
+        skipLine();
+        logInfo(newl << "Your house have not been rated yet.");
+    }
 
     if (house->getOccupier() != nullptr) {
         logInfo("Occupier: " << Colors::GREEN << house->getOccupier()->getFullName());
